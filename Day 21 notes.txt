@@ -1,0 +1,284 @@
+VF Component
+			name : ctsemp
+<apex:component>
+	<apex:attribute name="empName' type="String" description="Employee Name" />
+	<apex:attribute name="age" type="Integer" description="Employee age" />
+	<apex:attribute name="color" type="String" description="Color" />
+	<apex:pageBlock title="Employee">
+		Employee Name : <apex:outputLabel style="color:{!color}" value="{!empName}" /> <br/> <br/>
+		Employee Age : <apex:outputLabel style="color:{!color}" value="{!age}" /> <br/> <br/>
+	</apex:pageBlock>
+</apex:component>
+
+----------------------------------------------------vf page ---------------
+<apex:page>
+	<c:ctsemp empName="RADHA" age="41" color="red" />
+	<c:ctsemp empName="RAM" age="54" color="green" />
+</apex:page>
+
+===================================================================================
+<apex:component>
+	<apex:attribute name="records" type="sobject[]" description="Data to be displayed" />
+	<apex:attribute name="fields" type="String[]" description="Fields which you want to display" />
+	<apex:pageBlock title="Records">	
+		<apex:pageBlockTable value="{!records}" var="a">
+			<apex:repeat value="{!fields}" var="fld">	
+				<apex:column value="{!a[fld]}" />
+			</apex:repeat>
+		</apex:pageBlockTable>
+	</apex:pageBlock>
+</apex:component>
+
+--------------------------------------------------------------------------
+public class DataList_Example{
+	public List<Account> accounts { set; get; }
+	public List<Contact> contacts { set; get; }
+	public List<String> accFields { set; get; }
+	public List<Account> accounts { set; get; }
+	public DataList_Example(){
+		accFields = new List<String>{'Name','Phone','Rating','Industry','Ownership','Type'};
+		conFields = new List<String>{'LastName','FirstName','Phone','Email'};
+		String query1 = 'Select Id';
+		for(String s1: accFields){
+			query1 = query1 + ','+s1;
+		}
+		query1 = query1 + ' from Account limit 4';
+		String query2 = 'Select Id';
+		for(String s2 : conFields){
+			query2 = query2+','+s2;
+		}
+		query2 = query2 +' from Contact limit 4';
+		account = Database.query(query1);
+		contacts = Database.query(query2);
+		}
+	}
+---------------------------------------------------------------
+<apex:page controller="DataList_Example">
+	<c:ctsemp records="{!accounts}" fields="{!accFields}" />
+	<c:dataList records="{!contacts}" fields="{!conFields}" />
+</apex:page>
+==============================================================================
+<apex:component>
+	<style>
+		.box{	
+			width: 1000px;
+			height: 50px;
+			margin-left: 50px;
+			margin-top: 20px;
+			padding: 20px;
+			border: 1px solid red;
+		}
+	</style>
+	<apex:form>
+	<div class="box">
+		<table width="100%">
+			<tr width="100%">
+				<td width="40%">	
+					<apex:image value="{!Resource.IMAGENAME}" width="150" />
+				</td>
+				<td width="30%">
+					Logges In: {!User.FirstName}
+				</td>
+				<td width="30%">
+					<div>
+						<apex:inputText />
+						<apex:commandButton value="Submit" />
+					</div>
+				</td>
+			</table>
+		</div>
+		</apex:form>
+	</apex:component>
+------------------------------------------------------
+<apex:page showHeader="false">MyFirstSR
+	<c:header_Example />
+</apex:page>
+=====================================================================================
+Static Resource:
+---------------
+
+	<apex:page>
+		<apex: image value="{!$Resource.SBILOGI}" width="150"/>
+	<apex:image value="{!URLFOR($Resource.HDFCLOGO,'HDFCIMAGE/HDFC.png')}" />
+	</apex:page>
+	
+=====================================================================================
+Email Services:
+-------------------
+1. These are used to handle the email using apex.
+2. These are two types of email services
+	a. Outbound EmailServices
+	b. Inbound EmailServices
+3. Outbound Email Services:
+	a. If you are sending any email from salesforce to external system then we call it as outbound email services.
+4. Inbound Email Services:
+	a. If you are receieving any email from external system to salesforce is called inbound email services.
+5. Messaging.Email:
+	1. Messaging is a namespace.
+	2. It will contain all the classes and methods required for handling messaging services.
+	3. This class contains all the methods which are common in single and mass email message.
+	4. Methods:
+		
+		a. setBccSender(Boolean flag):
+			1. This method will take boolean value as inputparameters.
+			2. If the flag value is set as true, one copy of email will sent to the sender who is sending the email.
+		
+		b. setReplyTo(String replyAddress):
+			1. When clicks on reply in the email, mail will be sent to the email address defined using this method.
+		
+		c. setTemplateID(templateId):
+			1. If you want to send any emailtemplate as body of the email then we defined that templateId as setTemplateID.
+		
+		d. setSaveAsActivity(saveAsActivity):
+			1. This will take the bollean value as input.
+			b. When set as true, email will be saved as activity on record which is set as target object Id.
+		
+		e. setSenderDisplayName(displayName):
+			1. This will set the sender name.
+		
+		f. setUseSignature(Boolean useSignature)
+			1. This will take the boolean value as input.
+			2. When set as true, users signature will be appended to the email.
+			
+6. Messaging.Email[] emails = new Messaging.Email[]{email1, email2,......};
+7. Messaging:
+	1. It is a pre-defined apex class.
+	2. This class contains the methods to send mass and single email message.
+	3. sendEmail(Messaging.Email[], flag) :
+		a. When we pass flag as true, if any one of the email fails, it will stop entire operation.
+		b. When we pass flag as false, if any one of the email fails, it will stop that email only.
+
+================================================================
+	public class Example_1{	
+		public void invoke(){
+			Messaging.SinleEmailMessage msg = new Messaging.SinleEmailMessage();
+			String[] toadd = new String[]{'xxxxxxxxx@gmail.com'};
+			String[] bcc = new String[]{'xxxxxxxxxxxx@gmail.com'};
+			String[] cc = new String[]{'xxxxxxxxxxxxxxxx@gmail.com'};
+			msg.setToAddresses(toadd);
+			msg.setBccAddresses(bcc);
+			msg.setCcAddresses(cc);
+			msg.setSubject('Test Email');
+			msg.setSenderDisplayName('xxxx');
+			msg.setPlainTextBody('This is a test plaintext');
+			msg.setInReplyTo('xxxx@gmail.com');
+			Messaging.Email[] emails = new Messaging.Email[]{msg};
+			Messaging.sendMail(emails);
+		}
+	}
+------------------------------------------------------------------------------
+	public class Example_4 {
+		public void send(){
+			List<Contact> contacts = [select id from Contact where createdDate = THIS_WEEK];
+			List<Id> myIds = new List<Id>();
+			for(Contact c: contacts){
+				myIds.add(c.id);
+			}
+			EmailTemplate et = [ select if from EmailTemplate where name='Test'];
+			Messaging.MassEmailMessage msg = new Messaging.MassEmailMessage();
+			msg.setTemplateID(et.id);
+			msg.setTargetObjectIds(myIds);
+			
+			Messaging.Email[] emails = new Messaging.Email[]{msg};
+			Messaging.sendEmail(emails);
+			}
+		}
+
+===============================================================================
+public class Account_Mail{
+	public Account acc {set; get; }
+	public Account_Mail(Apexpages.StandardController controller){
+		acc = (Account)controller.getRecord();
+	}
+	public PageReference call(){
+		List<Contact> contacts = [select id, email from Contact where accountId=:acc.Id];
+		if(contacts.size() > 0){
+			List<String> toadd = new List<String>();
+			for(Contact c: contacts){
+				toadd.add(c.Email);
+			}
+			Messaging.SingleEmailMessage msg = new Messaging.SingleEmailMessage();
+			msg.setToAddresses(toadd);
+			msg.setSubject('Test Email');
+			msg.setHtmlBody('Dear Customer<br/> Please update your phone number <br/> Thanks');
+			Messaging.Email[] emails =new Messaging.Email[]{msg};
+			Messaging.sendEmail(emails);
+		}
+		PageReference p = new PageReference('/'+acc.Id);
+		return p;
+	}
+}
+-------------------------------------------------------------------------------------------
+<apex:page standardController="Account" extensions="Account_Mail" action="{!call}">
+</apex:page>
+
+https://*******************my.salesforce.com/apex/Account_Mail?id=************************
+
+===================================================================
+Difference between Single Email Messaging and MassEmailMessage:
+
+										Single Email								Mass Email
+Multiple recipients?					Yes											Yes
+Personalized body?						Yes(single body only)						Yes
+Special permission needed?				No											Yes, has to be enabled
+Merge fields?							Yes											Yes
+Personalized merge fields?				Yes(only one record at a time) 				Yes
+Templates?								Yes											Yes
+Template possibilities?					Text/HTML/VF/Custom Templates				Text/HTML/Custom Template
+
+===========================================================================================
+SingleEmailMessage:
+//SingleEmailMessage Methods
+================================================================
+Messaging.SingleEmailMessage message = new Messaging.SingleEmailMessage();
+message.toAddresses = new String[]{'abc@gmail.com','xyz@gmail.com'};
+message.optOutPolicy='FILTER';
+message.subject = 'Opt Out Test Message';
+message.plainTextBody = 'This is the message body.';
+Messaging.SingleEmailMessage[] messages = new List<Messaging.SingleEmailMessage>{message};
+Messaging.SendEmailResult[] results = Messaging.sendEmail(messages);
+
+if(results[0].success){
+	System.debug('The email was send successfully.');
+} else {
+	System.debug('The email failed to send: '+ results[0].error[0].message);
+}
+
+===============================================================
+MassEmailMessage:
+//MassEmailMessage Methods
+===============================================================
+
+public void SendMail(){
+	List<Contact> lstcon = [ Select id from contact limit 2];
+	List<Id> lstids = new List<Id>();
+	for(Contact c : lstcon){
+		lstids.add(c.id);
+	}
+	EmailTemplate et = [ Select id from EmailTemplate where name='EmailTemplatename' limit 1];
+	
+	Messaging.MassEmailMessage mail = new Messaging.MassEmailMessage();
+	mail.setTargetObjectIds(lstids);
+	mail.setSenderDisplayName('System Admin');
+	mail.setTemplateID(et.id);
+	Messaging.sendEmail(new Messaging.MassEmailMessage[]{mail});
+	}
+	
+Pagination
+=============================================================================
+
+public class Next_Previous{
+	public List<Account> accounts { set; get; }
+	public Next_Previous(){
+		accounts = [ select id, Name, Phone, Industry, rating, ownership from Account limit 5];
+	}
+	
+	public void nextRecords(){
+		integer size = 0;
+		accounts = [ select id, Name, Phone, Industry, rating, ownership from Account limit 5 offset: size+5];
+	}
+	
+	public void prevRecords(){
+		accounts = [ select id, Name, Phone, Industry, rating, ownership from Account limit 5];
+	}
+}

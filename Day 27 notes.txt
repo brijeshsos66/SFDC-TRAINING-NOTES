@@ -1,0 +1,27 @@
+User Story
+-----------
+Create a page which displays a set of recently modified 'Contacts' and the displays the contact list
+which may be filtered based on contact last name dropdown. The page should also have the capability
+to create new contacts providing inputs for 'First Name' and 'Last Name'.
+The email for the new contacts must be as 'lastname.firstname@abc.com'.
+The page displays the newly entered contacts on refresh.
+
+Technical Requirements
+1. Create an 'Account' which Name='TestProject' and Customer_ID__c = 'EXTestProject'.
+
+2. Load the below Contact file associating it with the 'TestProject' Account.
+	The association in the source file should not be based on Salesforce Id.
+	
+3. Create a custom apex class with methods having following functionality.
+	a. Fetch recently modifed contacts.
+	b. To filter based on the selected contact last name.
+	c. Filter options.
+	d. Performing contact insert with error handling.
+	e. Create Test Class for the Apex class.
+
+4. Create a Visualforce page with the custom apex class. The page must have 3 sections.
+	a. Dropdown to filter at the top.
+	b. View-only contact display in tabular format and a 'Refresh' button.
+	c. Section to enter new contact details and a 'Save' button at the bottom.
+
+5. Create a workflow to update the email id as 'lastname.firstname@abc.com'.

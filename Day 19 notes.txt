@@ -1,0 +1,310 @@
+Triggers:
+---------
+1. Triggers are automated process.
+2. Triggers will be fired when a dml operation ( Insert,Update, Delete, UnDelete, Merge, Upsert) is performed on the sobject.
+3. Triggers are classified into two types:
+	a. Before Triggers
+	b. After Triggers
+4. Before Triggers:
+	a. These triggers are fired before the new data is saved to sobject.
+5. After Triggers:
+	a. These triggers are fired after the new data is saved to sobject.
+6. Triggers are fired when DML event occur on the object.
+	a. Before Insert
+	b. Before Update
+	c. Before Delete
+	d. After Insert
+	e. After Update
+	f. After Delete
+	g. After UnDelete
+
+7. Trigger Context Variables:
+	a. These are  the static variables defined under the standard apex class Trigger.
+	b. These variables stores the data required during the run time of the trigger.
+	c. Variables:
+		1. isExecuting:
+			a. It is a boolean value.
+			b. This will return true, if the current context of apex code is trigger.
+		b. isBefore:
+			a. This is a boolean value.
+			b. This will return true, if the current context of trigger is before trigger.
+		c. isAfter:
+			a. This is a boolean value.
+			b. This will return true, if the current context of trigger is after trigger.
+		d. isInsert:
+			a. This is a boolean value.
+			b. This will return true, if the current context of trigger is insert trigger.
+		e. isUpdate:
+			a. This is a boolean value.
+			b. This will return true, if the current context of trigger is update trigger.
+		f. isDelete:
+			a. This is a boolean value.
+			b. This will return true, if the current context of trigger is delete trigger.
+		g. isUndelete:
+			a. This is a boolean value.
+			b. This will return true, if the current context of trigger is UnDelete trigger.
+		h. new:
+			a. It is a list of sobject.
+			b. This will store list new records on which we are performing operation.
+		i. old:
+			a. It is a list of sobject.
+			b. This will store list of old version of records on which we are performing operation.
+		j. oldMap:
+			a. It is a Map of records, where Id of the record is the key and record is the value.
+			b. This will contain old version of records.
+		k. NewMap:
+			a. It is a Map of records, where If of the record is the key and record is the value.
+			b. This will contain new version of records.
+		l. size:
+			a. This is a integer value.
+			b. This will return count of no. of records on which the trigger is running.
+	8. Syntax:
+		
+		trigger triggerName on Sobject (event) {
+			}
+		
+		Example 1: Create a before insert trigger on Account.
+			trigger trigex1 on Account (before Insert){
+				}
+				
+		Example 2: Create a before update trigger on Contact.
+			trigger trigex2 on Contact (after Update){
+				}
+		
+		Example 3: Create after Insert and after delete trigger opportunity.
+			trigger opty_Run on Opportunity(after insert, after delete){
+				}
+		
+		Example 4: Create a before insert, before update, after undelete trigger on Case object.
+			trigger case_Handler on Case(before insert, bofore update, after undelete){
+				}
+	
+	9. DML will be performed only when the data is successfully save to sobject.
+	or
+	If you want to make any changes on the data which is successfully saved to database then we perform DML.
+	Note: If the data is not saved to database, then we perform write operation.
+		
+		Account acc = new Account();
+		acc.Name = 'Testing'; // Write
+		acc.Industry = 'Energy'; // Write
+		acc.Rating = 'Hot';
+			if(acc.Rating == 'Hot'){
+				acc.Ownership='Private';
+				acc.Rating = 'Warm';
+				}
+			insert acc;  // DML Operation
+		Account a = [ select id, type from Account where id =: acc.Id];
+		a.type='New Customer';
+		update a; // Modified in the database
+	
+	10. Before Insert Triggers:
+		a. Insert triggers are fired when we try to insert a new record or records into database.
+		b. We can insert the record using:
+			1. Edit pageLayout
+			2. Apex class
+			3. VF page
+			4. Anonymous window
+			5. DataLoader
+			6. Import Wizard
+			7. Tools
+			8. Webservice
+				etc...
+		c. By default every trigger is bulk trigger.
+		d. Before Insert Triggers.
+			1. This trigger will be fired before the new records are saved to database.
+			2. The list of new records which we are trying to insert into database are defined in Trigger.new
+			3. In the Before Insert trigger on the data which is available in Trigger.new we can perform below Read, Write
+			4. In the Before Insert trigger on the data which is available in Trigger.new we cannot perform below SOQL, DML.
+			-------------------------------------------------------------------------------------------------------------
+			Trigger			Event				Variable				Read			Write			SOQL		DML
+			-------------------------------------------------------------------------------------------------------------
+			Before			Insert				Trigger.new				Yes				yes				No           No
+			-------------------------------------------------------------------------------------------------------------
+			
+			Example 1:
+			Whenever a new Account is created then set rating as Warm, ownership as Private, type as prospect and Active as Yes.
+			--------------------------------------------------------------------------------------------------------------------
+			
+				trigger Account_trigger_1 on Account(before insert){
+				//Trigger.new : Thsi will ocntain list of new records which we want to insert
+				for(Account a: Trigger.New){
+					a.Rating='Warm';
+					a.Ownership='Private';
+					a.Type='Prospect';
+					//a.Active__c='Yes';
+					}
+				}
+			----------------------------------------------------------------------------------------------------------
+			Example 2:
+			Whenever new Account is created with industry as Banking then assign wilson as owner of the record.
+			----------------------------------------------------------------------------------------------------------
+				trigger example on Account(before Insert){
+					//Fetch the Id of the user wilson
+					User u = [ select id from User where alias='wil'];
+					
+					//Take one by one record from Trigger.New
+					for(Account a: Trigger.New){
+						if(a.industry == 'Banking'){
+							a.ownerId = u.Id;
+							}
+						}
+					}
+	
+	11. After Insert Triggers:
+		a. This triggers are fired after new record is saved successfully into database.
+		b. Trigger.New : This will contain list of new records which are inserted successfully into sobject.
+		c. Trigger.NewMap : This will contain list of new records which are inserted successfully into sobject.
+	
+	Trigger 	Event			Variable		Read		Write		SOQL		DML	
+	------------------------------------------------------------------------------------
+	After		Insert			Trigger.New		Yes			No			Yes			Yes
+	After 		Insert			Trigger.NewMap	Yes			No			Yes			Yes
+	------------------------------------------------------------------------------------
+	
+	Example 1:
+	Whenever a new Account is Created with rating as Hot then create Opportunity for the account.
+	------------------------------------------------------------------------------------------------
+		
+		trigger Account_Trigger_2 on Account(after insert){
+			List<Opportunity> optyList = new List<Opportunity>();
+			for(Account a: Trigger.New){
+				if(a.rating == 'Hot'){
+					Opportunity op = new Opportunity();
+					op.AccountId = a.Id;
+					op.Name = a.Name;
+					op.CloseDate = System.today() + 15;
+					op.StageName = 'Prospecting';
+					op.Type = 'New Customer';
+					optyList.add(op);
+					}
+				}
+			insert optyList;
+		}
+	
+	12. Update Triggers:
+		a. Update triggers are fired when we try to modify the existing data in the object.
+		b. There are two types of update triggers
+			1. Before Update Triggers.
+			2. After Update Triggers.
+		c. Before Update Triggers:
+			1. When we are modifying any record in the object, before the changes on the record are saved to the database, Before
+				Update triggers are fired.
+			2. Trigger.old:	
+				1. It is a list of records.
+				2. It will contain old version of records on which we have performed Update.
+			3. Trigger.OldMap:
+				1. It is a Map of records, with record id as key and record as value.
+				2. This will contain old version of the records on which we are performing update.
+			4. Trigger.New:
+				1. It is a list of records.
+				2. It will contain new version of records on which we are performing update.
+			5. Trigger.NewMap:
+				1. It is a Map of records, with record id as key and record as value.
+				2. This will contain new version of the records on which we are performing update.
+			
+			Event			Variable			Read		Write		DML 		SOQL
+			----------------------------------------------------------------------------------
+			Before Update	Trigger.old			Yes			No			No			Yes
+			Before Update	Trigger.oldMap		Yes			No			No			Yes
+			Before Update	Trigger.New			Yes			Yes			No			No
+			Before Update	Trigger.NewMap		Yes			Yes			No			No
+			----------------------------------------------------------------------------------
+			
+			Example 1:
+			Whenever phone number of the Account is modified update the corresponding contacts
+			otherPhone as Account old Phone Number
+			mobilPhone as Account new Phone Number
+			--------------------------------------------------------------------------------------
+				
+				trigger example on Account(before Update){
+					
+					//Fetch all the accounts with old version of records
+					Map<Id,Account> oldMap = Trigger.oldMap;
+					
+					//Fetch all the accounts with new version of records
+					Map<Id,Account> newMap = Trigger.newMap;
+					
+					List<Id> accIds = new List<Id>();
+					//Take one by one account and check whether phone number if modified or not
+					Set<Id> keys = oldMap.keySet();
+					
+						for(Id k: keys){
+							Account old = oldMap.get(k); // Account with old values
+							Account acc = newMap.get(k); // Account with new values
+							if(old.Phone!=acc.Phone){
+								// if the phone number of modified then add the id of the account to accIds
+								accIds.add(k);
+							}
+						}
+					//Wrtie query to fetch all the contacts of those accounts whose accountId is int accIds
+					List<Contact> contacts = [ select id, AccountId, OtherPhone, MobilePhone from Contact where accountId in: accIds];
+					//Take one by one contact and update the data
+					for(Contact c: contacts){
+						Account old = oldMap.get(c.accountId);
+						Account acc = newMap.get(c.accountId);
+						c.otherphone = old.Phone;
+						c.mobilePhone = acc.Phone;
+						}
+					update contacts;
+				}
+		
+		e. After Update Triggers:
+			1. When we are modifying any record in the object, after the changes in the record are
+				saved to the database, after update triggers are fired.
+			
+			2. Trigger.old:
+				1. It is a list of records.
+				2. It will contain old version of records on which we have performed Update.
+			
+			3. Trigger.oldMap:
+				1. It is a Map of records, with record id as key and record as value.
+				2. This will contain old version of the records on which we are performing update.
+			
+			4. Trigger.New:
+				1. It is a list of records.
+				2. It will contain new version of records on which we have performed update.
+			
+			5. Trigger.NewMap:
+				1. It is a map of records, with record id as key and record as value.
+				2. This will contain new version of the records on which we are performing update.
+			
+			6. 
+			Event			Variable			Read		Write		DML 		SOQL
+			----------------------------------------------------------------------------------
+			After Update	Trigger.old			Yes			No			No			No
+			After Update	Trigger.oldMap		Yes			No			No			No
+			After Update	Trigger.New			Yes			Yes			Yes			Yes
+			After Update	Trigger.NewMap		Yes			Yes			Yes			Yes
+			----------------------------------------------------------------------------------
+		
+		Example 1:
+		Whenever opportunity stage is modified to closed won then share the record with student 
+		First: Change the owd on opportunity to private
+		GoTo the profile of the user with whom you want to share and remove viewAll and modify all access
+		-------------------------------------------------------------------------------------------------
+		
+			trigger Apex_Share_Opty on Opportunity(after update){
+				
+				Map<Id, Opportunity> oldMap = Trigger.oldMap;
+				Map<Id, Opportunity> newMap = Trigger.newMap;
+				
+				User u = [select id from User where alias='slive'];
+				
+				List<OpportunityShare> share = new List<OpportunityShare>();
+				Set<Id> keys = oldMap.keySet();
+				
+					for(Id k: keys){
+						Opportunity old = oldMap.get(k);
+						Opportunity newOpt = newMap.get(k);
+						if(old.stageName != 'Closed Won' && newOpt.stageName == 'Closed Won'){
+							OpportunityShare os = new OpportunityShare();
+								os.opportunityId = k;
+								os.UserOrgroupId = u.Id;
+								os.OpportunityAccessLevel = 'Read';
+								os.RowCause = 'Manual';
+								share.add(os);
+								}
+							}
+						insert share;
+					}
+					

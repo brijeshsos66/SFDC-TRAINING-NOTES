@@ -1,0 +1,310 @@
+Wrapper class:
+---------------
+1. It is a user-deined datatype.
+2. It is also an apex class.
+3. It contains only datamembers.
+4. Wrapper class doesn't contain any methods.
+
+	Example:
+		
+		public class className{
+			datamembers
+		}
+		
+		public class Student{
+			public String name;
+			public String city;
+			public String phone;
+		}
+		
+		student std;
+		
+	Example: Create a wrapper class Employee with name, salary, exp
+		public class Employee{
+			public String name;
+			public Decimal salary;
+			public Decimal exp;
+		}
+		
+	Example: Create a wrapper class Invoice with invoiceNo, invoiceDate, quantity, price
+		public class Invoice{
+			public String invoiceNo;
+			public Date invoiceDate;
+			public Integer quantity;
+			public Decimal price;
+		}
+		
+Map:
+-----
+1. It is a key value pair.
+2. This is a collection of similiar elements.
+3. Size can grow or decrease based on run time requirement.
+4. Key should be unique.
+5. Value can be duplicate.
+6. Syntax:
+	
+	Map<Key,Value> mapName;
+	
+	Example 1: Create a map with student name as key and Age as value.
+		Map<String,Integer> stdMap;
+		
+	Example 2: Create a map with cityName as key and state name as a value.
+		Map<String,String> cityMap;
+		
+	Example 3:Create a map with AccountId as key and account as value.
+		Map<Id,Account> accMap;
+		
+	Example 4: Create a Map with Account Name as key and Account Industry as value.
+		Map<String,String> accMap;
+		
+	Example 5: Create a Map with Account Name as key and List of contacts as value.
+		Map<String,List<Contact>> accMap;
+		
+7. Intialize the Map:
+		Map<String,String> studMap = new Map<String,String>();
+		Map<Id,Account> accMap = new Map<Id,Account>();
+		Map<String,Account> accMap = new Map<String,Account>();
+		
+8. put(key,value):
+		
+	Example:
+		Map<String,String> stdMap = new Map<String,String>();
+		stdMap.put('Sam','Hyd');
+		stdMap.put('Ram','Ban');
+		system.debug('stdMap:::'+stdMap);
+		
+	Example 2:
+		Name 			Age
+		===================
+		Ram 			30
+		Kiran			40
+		Hari			90
+		Prasad			40
+		
+		Map<String,Integer> stdMap = new Map<String,Integer>();
+		stdMap.put('Ram',30);
+		stdMap.put('Kiran',40);
+		stdMap.put('Hari',90);
+		stdMap.put('Prasad',40);
+
+9. get(key):
+	a. This will return the corresponding value form the map based on key.
+	
+		Map<String,String> cityMap = new Map<String,String>();
+		cityMap.put('Hyd','TG');
+		cityMap.put('Che','TN');
+		cityMap.put('Ban','KA');
+		
+		String s = cityMap.get('Hyd');
+		System.debug(s);  //TG
+		
+		String b = cityMap.get('Ban');
+		System.debug(b);  // KA
+		
+	b.  Map<String,Integer> cityMap = new Map<String,Integer>();
+		cityMap.put('Hyd',30);
+		cityMap.put('Che',40);
+		cityMap.put('Ban',50);
+		
+		String s = cityMap.get('Hyd');
+		System.debug(s);  //30
+		
+		String b = cityMap.get('Ban');
+		System.debug(b);  // 50
+		
+10. containsKey(key):
+	a. This will return true, if the map contains the key.
+		Map<String,String> cityMap = new Map<String,String>();
+		cityMap.put('Hyd','TG');
+		cityMap.put('Che','TN');
+		cityMap.put('Ban','KA');
+		
+		Boolean b= cityMap.containsKey('Hyd');
+		System.debug(b);  // true
+		
+		Boolean c = cityMap.containsKey('Delhi');
+		System.debug(c);  // false
+
+12. keySet():
+	a. This will return set of keys
+		Map<String,String> cityMap = new Map<String,String>();
+		cityMap.put('Hyd','TG');
+		cityMap.put('Che','TN');
+		cityMap.put('Ban','KA');
+		
+		Set<String> keys = cityMap.keySet();
+		System.debug(keys);    //Hyd,Che,Ban
+		
+		for(string cityn : cityMap.keySet()){
+			System.debug('cityn:::'+cityn);
+		}
+
+13. values():
+	a. This will return values from the map.
+		Map<String,String> cityMap = new Map<String,String>();
+		cityMap.put('Hyd','TG');
+		cityMap.put('Che','TN');
+		cityMap.put('Ban','KA');
+		List<String> values = cityMap.values(); //TG,TN,KA
+		
+	Example 1:
+	a. Create a List of Account with following data:
+	Name		Phone			Industry
+	------------------------------------------
+	Wipro		040-111			Banking
+	TCS			020-222			Energy
+	Dell		030-333			Education
+	
+	b. Create a Map with Account name as key and Phone as value and insert the data from above list.
+	
+		Map<String,String> accMap = new Map<String,String>();
+		
+		for(Account a: accounts){
+			accMap.put(a.Name,a.Phone);
+		}
+	
+	c. Create a map with Account name as key and account as value and insert from the above list.
+		
+		Map<String,Account> accMap = new Map<String,Account>();
+		
+		for(Account a: accounts){
+			accMap.put(a.Name,a);
+		}
+		
+	d. Create a Map with Account name as key and industry as value and insert the data from the above list.
+	
+		Map<String, String> accMap = new Map<String,String>();
+			
+		for(Account a: accounts){
+			accMap.put(a.Name,a.Industry);
+		}
+	
+	e. Create a Map with Account name as key and Account as value
+		1. return all the account names from the map.
+		2. return all the list of accounts from the map.
+	
+	
+			Map<String,Account> accMap = new Map<String,Account>();
+			for(Account a: accounts){
+				accMap.put(a.Name,a);
+			}
+			
+			Set<String> keys = accMap.keySet();			//(1) --> return keys
+			List<Account> accounts = accMap.values();	//(2) --> return accounts
+			
+	--------------------------------------------------------------------------------
+	Big Example:
+	
+	public class Map_Example_1 {
+		public Map<String,List<String>> cityMap { set; get; }
+		public List<SelectOption> cities { set; get; }
+		public List<SelectOption> places { set; get; }
+		public String citySelected { set; get; }
+		
+		public Map_Example_1(){
+			cities = new List<SelectOption>();
+			places = new List<SelectOption>();
+			SelectOption n = new SelectOption('none','-None-');
+			cities.add(n);
+			places.add(n);
+			// cityName as key and List of places as value
+			cityMap = new Map<String,List<String>>();
+			List<String> hplaces = new List<String>('SRNagar','LBNagar'};
+			List<String> bplaces = new List<String>('ECity','Marthali'};
+			List<String> cplaces = new List<String>('Thambaram','Chromepet'};
+			cityMap.put('Hyd',hplaces);
+			cityMap.put('Che',cplaces);
+			cityMap.put('Ban',bplaces);
+			
+			//fetch all the cities from the Map
+			Set<String> keys = cityMap.keySet();
+			for(String s: keys){
+				SelectOption op = new SelectOption(s,s);
+				cities.add(op);
+			}
+		}
+		
+	public void search(){
+		//Remove all the old places from the picklist
+		places.clear();
+		//Create a none option and add it to the places
+		SelectOption n = new SelectOption('none','-None-');
+		places.add(n);
+		//If citySelected is not equals to none then fetch the places from the map
+		if(citySelected != 'none'){
+			List<String> myPlaces = cityMap.get(citySelected);
+			for(String s: myPlaces){
+				SelectOption op = new SelectOption(s,s);
+				places.add(op);
+			}
+		}
+	}
+}
+
+--------------------------------------------------------
+<apex:page controller="Map_Example_1">
+	<apex:form>
+		Cities:
+		<apex:selectList size="1" value="{!citySelected}">
+			<apex:actionSupport event="onchange" action="{!search}" reRender="one" />
+			<apex:selectOptions value="{!cities}" />
+		</apex:selectList>
+		<br/><br/>
+		Places:
+		<apex:selectList size="1" id="one">
+			<apex:selectOptions value = "{!places}" />
+		</apex:selectList>
+	</apex:form>
+</apex:page>
+
+
+Types of Custom Settings:
+--------------------------------
+There are two types of custom settings:
+1. List
+2. Hierarchy
+
+List:
+-----
+A type of custom settings that provides a reusable set of static data that can accessed across your organization.
+
+For example, you have a custom setting for Status code. It has 2 fields:
+Name (object Name field same as when you create a custom object)
+Code (text field)
+
+How to access this List type custom setting in Apex:
+//METHOD 1
+//Returns a map of the data sets defined for the custom setting.
+
+Map<String,Status_Code__c> mapStatusCodeCustomSetting = Status_Code__c.getAll();
+for(Status_Code__c mandatoryRoles : mapStatusCodeCustomSetting.values()){
+	system.debug('mandatoryRoles::::'+mandatoryRoles);
+}
+
+//METHOD 2
+for(Status_Code__c mandatoryRoles : Status_Code__c.getAll().values()){
+	system.debug('mandatoryRoles::::'+mandatoryRoles);
+}
+
+//METHOD 3
+Status_Code__c statusCodeCS = Status_Code__c.getValues('Chennai');
+String statusCode = statusCodeCS.Code__c;
+system.debug('statusCode::::'+statusCode);
+
+//METHOD 4
+String statusCode = Status_Code__c.getValues('Chennai').Code__c;
+
+----------------------------------------------------------------------------------
+
+Accessing a Hierarchy Custom Setting:
+--------------------------------------
+
+The getOrgDefaults() method to return the dataset values for the organization level.
+CustomSettingName__c hierarchySetting = CustomSettingName__c.getOrgDefaults();
+
+The getInstance() method to return the dataset value for the specific profile. It can be used with a User ID.
+CustomSettingName__c hierarchySetting = CustomSettingName__c.getInstance(User_ID);
+
+
+	
+	

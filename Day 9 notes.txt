@@ -1,0 +1,11 @@
+
+Process Builder:
+------------------
+	1. Select the object
+	2. Define the criteria
+	3. Select and Define Action
+	4. Activate the process
+		
+		a. A record changes: When you create a record or change a record.
+		b. A platform event message is received 
+		c. It's invoked by another process.

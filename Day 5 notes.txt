@@ -1,0 +1,394 @@
+Relations:
+---------------
+	1. Relations are used to establish connection between two or more objects.
+	2. There are five types of relations:
+		a. Lookup Relation
+		b. Master-Detail Relation
+		c. Many-to-Many Relation ( junction object)
+		d. Hierarchical Relation
+		e. External Lookup Relation
+	3. Lookup Relation:
+		a. Lookup Relation is a datatype of a field.
+		b. We can create lookup field on Standard Object and Custom Object. 
+		c. We can create lookup field on the object which contains the data and which doesn't contain the data.
+		d. It will create one-to-Many relation between the object.
+		e. Object on which we have lookup field, that object is called child object.
+		f. Object to whose data lookup field is referring that object is called Parent object.
+		g. Lookup field is a optional field.
+		h. Lookup fields will store Id of the parent record.
+		i. We can create self lookup.
+		j. If you delete the parent record, lookup field value is kept as blank.
+		k. If you don't want parent record to be deleted when it has a child, then enable the option of don't 
+			allow deletion of parent when it is a part of lookup relation.
+		l. Lookup filter, this will specify which records of the parent should be displayed on the pop-up window.
+		m. Maximum number of lookup relations what we can create are 25, directly or indirectly we can have 40
+		relation on a object.
+		n. Standard lookup fields which are created in salesforce:
+		
+		Parent Object				Child Object			Lookup Field Name
+		------------------------------------------------------------------------
+		Account						Contact					Account
+		Account						Opportunity				Account
+		Account						Case					Account
+		Account 					AccountTeamMember		Account
+		Account						Task					WhatId
+		
+		o. Which of the following statements are true?
+		
+		Parent					Child				Status
+		--------------------------------------------------------
+		Standard				Standard			Allowed
+		Standard				Custom				Allowed
+		Custom					Standard			Allowed
+		Custom					Custom				Allowed
+	
+	4. Master-Detail Relation : 
+		a. It is one-to-many relation.
+		b. We will create one-to-many relation using Master-Detail datatype.
+		c. This field can be created only on Custom object.
+		d. Master-Detail is a required field (Mandatory field by default)
+		e. Master-Detail field can be created only on those custom object which doesn't contain the data.
+		f. Master-Detail field can be created master-detail field that object is called child/detail object.
+		g. Object to whose date we are  referring that object is master object.
+		h. Which of the following statements are true ??
+		
+		Parent				Child				Status
+		------------------------------------------------------
+		Standard			Standard			Not Allowed
+		Standard			Custom				Allowed
+		Custom				Standard			Not Allowed
+		Custom				Custom				Allowed
+		
+		i. 	Object on which we have created master-detail field, that object will not have any owner field.
+		j. Owner of the master record, should be the owner of the child record.
+		k. When we delete a master record, corresponding child records are also deleted.
+		l. When we undelete the master records, corresponding child records are also undeleted.
+		m. Master-Detail field will store the 18 character Id of the master record.
+		n. We can create two master-detail fields on the object.
+		
+				A            A       B           A     B    C
+				|            |       |           |     |    |
+				B            ---------           ------------
+				                 |                     |
+								 C					   D
+			1. Accepted		2. Accepted			3. Not Accepted
+		
+		o. An object can be master to any number of objects
+				
+				A            A            A                 A
+			    |            |            |                 |
+				B         --------    ----------      ----------------
+						  |      |    |    |    |     |    |     |    |
+						  B      C    B    C    D     B    C     D    E
+						  
+		1. Accepted		2. Accepted   3. Accepted      4. Accepted
+		
+		p. Child object can be a parent to any other object upto three levels:
+		
+			A            A               A                     A
+			|            |               |                     |
+			B            B               B                     B
+						 |               |                     |
+						 C               C                     C
+										 |                     |
+										 D                     D
+															   |
+															   E
+		1. Accepted   2. Accepted    3. Accepted          4. Not Accepted
+
+		q. If any object has two masters on it, it cannot be a parent to any other object.
+		
+			A      B                    A                     A       B
+			|      |                    |                     |       |
+			--------					B					  ---------
+				|                       |                         |
+				C                       C                         C
+																  |
+																  D
+														
+			1. Accepted				2. Accepted				3. Not Accepted
+			
+		r. Maximum structure what we can form
+		
+				A        X
+				|        |
+				B        Y
+				|        |
+				C 		 Z
+				|        |
+				----------
+					 |
+					 D
+		s. Sharing Settings:
+		This will specify which user can perform Craete/edit/Delete/Read operation on corresponding child record.
+			1. Read Only: If you choose this option, All the users who have minimum read access on ,master record can perform Read operation
+						 on the corresponding child records.
+			2. ReadWrite: If you choose this option, All the users who have minimum readwrite access on ,master record can perform Create/Edit/Delete/Read operation
+						 on the corresponding child records.
+		
+		t. Allow Reparenting:
+			If you enable this option, child can change it's parent.
+		
+		5. Junction Object(Many-to-Many Relation)
+			1. Any Custom object with two master-detail fields on it is called Junction Object.
+			2. It will maintain Many-to-Many Relations.
+			3. First Master-Detail field is called primary Master.
+			4. Second Master-Detail field is called Secondary Master.
+			5. Who ever is the owner of the primary master, he will be owner of the corresponding child records.
+			6. If you delete any one of the master-record, corresponding child records are deleted.
+			7. Junction object cannot be parent to any other object.
+		
+		6. Hierarchical Relation:
+		--------------------------
+			1. This can be created only on user object.
+			2. This is used to create one to one relation.
+			3. This will create the relation between user to user.
+			4. Navigation
+				Setup
+				---->Build
+					---->Customize
+						---->User
+							---->Fields
+								---->Custom Fields	
+									---->Hierarchical Relation
+			
+			5. How to check this field
+				Setup
+				----> Administer
+					----> Manage Users
+						----> Users
+							----> New
+		
+		Q: How to create Master-Detail field on custom obejct which already contains the data.
+		Example: Customer
+				Payment Object : 5000 records
+			
+		Requirements: Create a Master-Detail field on Payment Object with Customers as Master.
+		Step 1: Create a lookup field on the Payment object choosing Customer as parent.
+		Step 2: GoTo every record on the payment object and assign parent lookup field.
+		Step 3: Change the datatype from lookup to master-detail relation.
+		Note: If you have large amount of data in the child object, then we use ETL tools to upload the data.
+		
+			Setup
+			----> Build
+				----> Create
+					----> Objects
+						----> Choose Master Object
+							----> Search Layout
+								----> Lookup Dialogs
+		
+		User
+		-----
+			1. He is active paying member.
+			2. Every user should have a role, profile, license.
+			3. Steps to create a user
+			Classic:
+			Setup
+			----> Adminster
+				----> Manage Users
+					----> Users
+						----> New User
+			
+			Lightning:
+			Setup
+			----> Administer
+				---->User
+					----> Users
+			
+			Step 1: Enter the required details (Last name, alias name, Nickname)
+			Step 2: Choose the Role
+			Step 3: Choose the license
+			Step 4: Choose the profile
+			Step 5: Create
+			Step 6: User will get activation link for registered email.
+			
+			Note: Once the user is created we cannot delete this, we can only de-activate him.
+			
+			Role:
+			-------
+				1. This will specify hierarchy of the data model and where you stand in the hierarchy.
+				2. This will specify to whom the user has to report.
+				3. Whose data you can access.
+				
+					Director
+					|--------------------> Principal
+					|                        |---> HOD
+					|                               |----> Professor
+					|								|----> Asst. Professor
+					|
+					|--------------------> Administrative head
+												|----> Clerk
+												|----> Non-Technical Staff
+					
+				4. Steps to create the roles
+				Classic:
+				Setup
+				----> Administer
+					----> Manage Users
+						----> Roles
+							----> Add Role
+				
+				Lightning:
+				Setup
+				----> Administration
+					----> Users
+						----> Roles
+							----> Add Role
+				Step 1: Enter Role Name
+				Step 2: Enter Role Label
+				Step 3: Enter Reports To Role
+				Step 4: Save
+				
+				Example:
+					
+					CEO
+					|----> VP HUMAN RESOURCE
+								|----> RECURITING MANAGER
+											|----> RECURITER
+			
+			5. If you want to delete any role, sub-ordinate role should be deleted first or assign the sub-ordinate 
+			role to some other role.
+			
+			6. If two users have same role, they may or may not get same permissions.
+		
+	Profiles:
+	-----------
+		1. Profiles will specify what user can access and perform when he/she logins to salesforce.org.
+		2. There are two types of profiles:
+			a. Standard Profile
+			b. Custom Profile
+		3. Standard Profile:
+			a. Profiles created by salesforce are called standard profiles.
+			b. Standard profiles cannot be deleted.
+			c. Example: System Administrator, Sales Manager, ....
+		4. Custom Profile:
+			a. Profiles created by the users as per his organizational business requirement.
+			b. Custom Profiles can be deleted or edited as your business needs.
+		5. 	Every profile is created for specific license/user.
+		6. Profile controls
+			a. Applications
+			b. Objects
+			c. Fields
+			d. PageLayouts
+			e. Record Types
+			f. Mini PageLayouts
+			g. CRUF (Create Read Update Delete) on Objects
+			h. Admin Permission
+			i. User Level Permission
+			j. Login Access Permissions
+				etc...
+		7. Every profile is clone of any one of the existing profile.
+		8. Steps to create custom profile:
+		Classic:
+		--------
+		Setup
+		----> Administer
+			----> Manage Users
+				----> Profiles
+					----> New Profile
+		
+		Lightning:
+		----------
+		Setup
+		----> Administration
+			----> Users
+				----> Profile
+					----> New Profile
+		
+		Step 1: Choose the existing profile.
+		Step 2: Verify License Name.
+		Step 3: Enter Custom Profile Name.
+		Step 4: Save
+		Step 5: Click On Edit
+		Step 6: Modify the permissions
+		Note: If two users have same profile, they will get same permissions.
+		
+1. De-Activate User:
+---------------------
+Navigation:
+Setup
+----> Administer
+	----> Manage Users
+		----> User
+			----> Uncheck Active CheckBox
+		
+	Note: When we de-activate the user, license given to the user will be given back,
+		  we can create one more license with same license.
+
+2. Freeze the user:
+--------------------
+	a. When we freeze the user, User will not be able to login.
+	b. License given to the user will be still with the User.
+	Setup
+	----> Administer
+		----> Manage Users
+			----> Select the User
+				----> Click on Freeze
+
+3. IP Address Restriction:
+--------------------------
+	a. If you want users to login from only given range of IP Address then we use IP Address restrictions.
+	b. This is defined at profile level.
+	c. Navigation:
+	Setup
+	----> Administer
+		----> Manage Device
+			----> Profiles
+				----> Choose Profile
+					----> Login IP Ranges
+						----> Specify the range
+
+4. IP Restriction for organization:
+-----------------------------------
+	a. When we want to users to login to salesforce application from recognized systems or activated browsers
+	   we use organizational restriction.
+	b. Whenever we are logging to salesforce from external devices or application it will ask for security token.
+	c. If your IP Address of the system is with in the range of Network IP Address defined then we can login with 
+	   username and password without any security token.
+	d. Navigation:
+	Setup:
+	----> Administer
+		----> Security Controllers
+			----> Network Access
+				----> New
+					----> Set the range
+	
+5. Login Hours Restriction:
+---------------------------
+	a. If you want to restrict the users based on time, then we can define login hours restriction at profile level.
+	b. Navigation:
+		Setup
+		----> Administer
+			----> Manage Users
+				----> Profile
+					----> Choose the Profile
+						----> Login Hours
+							----> Set the restrictions
+    c. Any user who loggedin during business hours can continue to work, even after business hours, but he cannot re-login.
+
+6. Business Hours Restriction:
+-----------------------------
+	a. This will specify days and hours during which support team is available.
+	b. All the escalation rules will work on this business hours.
+	c. Navigation:
+		Setup:
+		----> Administer
+			----> Company Profile
+				----> Business Hours
+					----> Edit
+						----> Modify the working hour
+
+7. Maximum Invalid Attempts Restrictions:
+-----------------------------------------
+	a. This will specify how many invalid attempts we can make, before logging into account.
+	b. If you cross the maximum limit, account will be locked.
+	c. Admin can reset the password or un-lock the account.
+		Navigation:
+		Setup
+		----> Administer
+			----> Manage users
+				----> Profile
+					----> Choose the Profile
+						----> Edit
+							----> Choose the maximum Invalid Attempts
+		

@@ -1,0 +1,310 @@
+<aura:handler>
+  a. This component is used to initialize the value/attributed in the component/applicaion
+  b. This event is triggerd on app or component for initialization.
+  c.This event is automatically fired when an app or components is initializations prior to rendering.
+  Attributes:
+       a. name    :It should be always "Init" only
+         b. value   :This should be assigned{!this}
+         c. action  :The client-side controller action that handles the value change.
+syntax :
+   <aura:handler name="init" value="{!this}" action="{!c.functionname}"/>
+   
+   Syntax of controller :
+   
+   ({
+	   methodname :function(component) {
+	   }
+   )}
+   
+   How to read the values of attributed with the controller
+   component.get("v.attributename");
+   
+   How to set the value of attributes with in the controllers.
+   component.set("v.attribute",value);
+   =========================================================================================================
+   
+   <aura:component>
+        <aura:attribute name="aval" type="Integer" required="true"/>
+		<aura:attribute name="bval" type="Integer" required="true"/>
+        <aura:attribute name="cval" type="Integer"/>
+		<div>
+		    <h2>Aval  :{!v.aval}</h2>
+			<h2>Bval  :{!v.bval}</h2>
+			<h2>Cval  :{!v.cval}</h2>
+		</div>
+   </aura:component>
+   ----------------------------------------------------------------
+   ({
+	   add:function(component) {
+		   var aInput =component.get("v.aval");
+		   var bInput =component.get("v.bval");
+		   var cOutput= aInput+bInput;
+		   component.set("v.cval",cOutput);
+	   }
+   })
+   
+   ------------------------------------------------------------------------------------
+   .THIS{
+	   padding-left: 80px;
+	   padding-top : 80px;
+	   color:green;
+   }
+   -----------------------------------------------------------------------------------------------
+   <aura:application extends="force:slds">
+   <c:Calculate aval="10" bval="10"/>
+   ===========================================================================================
+   Example 2 :
+   a-Create a new custom component
+   empcomp.cmp
+   
+   <aura:component>
+            <aura:attribute name="empName" type="string" default="Enter Name"/>
+			<aura:handler name="init" value="{!this}" action="{!c.show}"/>
+			Employee Name :{v.empName}
+			</aura:component>
+-----------------------------------------------------------------------------------------------------------------------
+			
+			b- create a client side controller
+			
+			({
+				show : function(component) {
+					component.set("v.empName","Ram");
+				}
+			)}
+=-----------------------------------------------------------------------------------------------------------------------------
+c- create a application
+<aura:applicaion>
+<c:empcomp></c:custom1>
+</aura:application>
+=====================================================================================
+Example 3:-
+
+a- create custom component : interestCalculate
+<aura:component>
+         <aura:attribute name="empName" type="String" default="Enter Name"/>
+         <aura:attribute name="amount"  type="decimal"/>
+		 <aura:attribute name="rate"    type="integer"/>
+		 <aura:attribute name="years"   type="integer"/>
+		 <aura:attribute name="intrest" type="decimal"/>
+		 <aura:handler   name="init"    value="{!this}" action="{!c.calculate}"/>
+		 
+		 <div>
+		    Employee Name:{!v.empName}<br/>
+			Amount   :      {!v.amount}<br/>
+			Rate     :      {!v.rate}<br/>
+            Years    :      {!v.years}<br/>
+			Interest :      {! v.intrest}
+			</div>
+</aura:component>
+--------------------------------------------------------------------------
+b- create a css fora component
+ .THIS{
+	   padding-left: 80px;
+	   padding-top : 80px;
+	   color:green;
+   }
+
+
+
+
+-------------------------------------------------
+c- crete a client side controller:
+({
+	calculate : function(component) {
+        component.set("v.empName","sam");
+		var amount=component.get("v.amount");
+		var years=component.get("v.years");
+		var rate=component.get("v.rate");
+		var intrest=amount*years*rate/100;
+		component.set("v.intrest",intrest);
+        
+		
+	}
+})
+
+--------------------------------------------
+d- create an application
+<aura:application>
+<c:Intrestcalcuate amount="1000" rate="10" years="2"/>
+</aura:application>
+
+
+-==========================================================================\
+Example 4-
+
+1-Create a custom component :
+<aura:component>
+    <aura:attribute name="names" type="string[]"/>
+	<aura:handler name="init" value="{!this}" action="{!c.callme}"/>
+	<aura:iteration items="{!v.names}" var="s">
+	<h1> Employee name :{!s}</h1>
+	</aura:iteration>
+	</aura:component>
+	
+	2- create  a cuStom controller
+	({
+		callme : function(component) {
+            var names=('Ankit','Adarsh','Aditya');
+			 component.set("v.names",names);
+		}
+})
+	
+	
+3- create a new application
+	<aura :application>
+	<c:collection3> </c:collection3>
+	</aura:application>
+===========================================================================
+
+	Example 5-
+	
+	create a  form  using Ui components in Lightning
+	
+	1- create the components to create Ui component
+	
+	<aura:component>
+	  <ui:inputNumber label="Amount" placeholder="0"/><br/>
+	  <ui:inputText   label="Enter Name" placeholder="FirstName,Last"/><br/>
+	  <ui:inputCurrency label="Sallary"/><br/>
+	  <ui:inputDateTime label="Date" displayDatePicker="true"/>
+	  <ui:button label="submit"/>
+	  </aura:component>
+	  
+	  
+	  2- create a  applicaion
+	  <aura:application>
+	  <c:uicomponent>
+	  	  </aura:application>
+------------------------------------------------------------------------------------------------
+Setting and  getting vaalues of componnt using id in the controller method
+component.find("idname").get("v.value");
+
+component.find("idname").get("v.value",value);
+
+-------------------------------------------------------------------------
+
+Example 6-
+1- create  a component : ui component2
+<aura:component>
+   <ui:inputText label="Enter Name" placeHolder="Employee Name" aura:id="name"/>
+   <ui:inputText label="My Name" aura:id="myname"/>
+   <ui:button label="submit" press="{!c.callme}"/>
+   </aura:component>
+   
+   
+   2- create a controllee
+   
+   ({
+	   callme:function(component)
+	   var name=component.find("name" .get("v.value");
+	   component.find("myname").set("v.value",name);
+   }
+   })
+   
+   3- create the applicaion
+   <aura:application>
+   <c:uicomponent2/>
+   </aura:applicaion>
+   ===============================================================
+   
+   Example 7-
+   
+   <aura:component>
+   <ui:inputText label="Name" aura:id="name" placeholder="First,Last"/>
+   <ui:button aura:id="outputButton" label="submit" press="{!c.getInput}"/>
+   <ui:outputText aura:id="nameOutput" value=""/>
+   </aura:component>
+   
+   contolller:
+   ({
+	   getInput: function(cmp,event) {
+		   var fullName=cmp.find("name".get("v.value");
+		   var outName=cmp.find("nameOutput");
+		   outName.set("v.value",fullName);
+	   }
+   })
+   
+   Applicatin:
+   <aura:application>
+   <c:uicomponent3/>
+   </aura:application>
+   ================================================================================================
+ 
+ Set the attribute value from the component based on the events on components
+ <aura:component>
+   <aura:attribute name="first" type="String" default="john"/>
+   <aura:attribute name="last" type="String" default="Doe"/>
+   
+   <ui:inputText label="First Name" value="{!v.first}" updateOn="keyup"/>
+   <ui:inputText label="Last Name" value="{!v.last}" updateOn="keyup"/>
+   
+   <!-- returnss johm doe-->
+   <ui:outputText value="{!v.first+' '+ v.last}"/>
+   </aura:component>
+   
+   Application:
+   
+   <aura:applicaion>
+   <c:uicomponent>
+   </aura:application>
+   ========================================================================
+   
+   Creating a picklist
+   
+   <aura:applicaion>
+   <ui:inputSelect>
+   <ui:inputSelectOption text="Red"/>
+    <ui:inputSelectOption text="green"value="true"/>
+	   <ui:inputSelectOption text="Blue"/>
+	   </aura:component>
+	   
+Application:
+
+<aura:application>
+ <c:compPick><c/:compPick>
+</aura:applicaion>
+=========================================================================
+
+if else in the lightning
+<aura:component>
+<aura:attribute name="edit" type="Boolean" default="true"/>
+<aura:if isTrue="{!v.edit}">
+<ui:button label="Edit"/>
+<aura:set attribute="else">
+No button
+</aura:set>
+</aura:component>
+
+Application:
+<aura:application>
+<c:compif/>
+</aura:application>
+
+
+
+   
+   
+   
+   
+
+
+
+
+
+
+
+	  
+	  
+
+
+
+
+
+
+
+		    
+   
+
+		   
+
+   

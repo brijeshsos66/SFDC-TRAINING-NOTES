@@ -1,0 +1,236 @@
+Application:
+	-------------
+		1. Application is a collection of tabs. 
+		2. Applications are classified into two types:
+			a. Standard Applications 
+			b. Custom Applications
+		
+		a. Standard Applications:
+		- Applications created by the salesforce are called Standard Applications.
+		- Standard Applications cannot be deleted.
+		
+		Examples: Sales Cloud, Service Cloud, Marketing, Knowledge App......
+		-Standard Applications can be customized.
+		
+		b. Custom Applications
+		- Applications created by the User as per organization bussiness requirement are called Customized Applications.
+		- Custom Applications can be customized or deleted as per the bussiness requirement.
+		
+		Steps to create Custom Application:
+		Classic:
+		---------
+		Setup
+		----> Build
+			----> Create
+				----> Apps
+					----> New App
+		
+		After going to the New App follow the next steps:
+		Step 1: Choose the Application type as Custom App.
+		
+		Step 2: Enter the App Details
+				App Label : ICICI Loan APP (Spaces allowed)
+				App Name : ICICI_Loan_App (API) (Spaces not allowed use underscore)
+		Note: App Label : Application will be displayed to the users on UI with app label.
+		Note: App Name : This is the actual Name of the application. Application will be referred
+							 programatically using the app name.
+							 
+		Step 3: Choose the logo for the Application.
+		We can choose on the externally available image in document object as logo.
+		Note: Width and Height should be 300px & 50px.
+		Note: Size should be more than 3KB and less than 20KB.
+		
+		Step 4: Choose the tabs and default landing tab.
+		Note: This will specify list of tabs that should be displayed in the application.
+		Note: Default Landing Tab:
+						Tab whose data need to be displayed on the home page of the
+						application is called default tab.
+		
+		Step 5: Choose the profile for whom the application should be visable.
+		Visable: If we choose visable option, application will be visable to the profile.
+		
+		Visable and Default: If you choose visable and default option, All the users with 
+							this profile, when they login for the first time this application
+							will be opened.
+	    
+		Lightning :
+		-----------
+		Setup
+		----> Platform Tools
+			----> Apps
+				----> App Manager
+					----> New Lightning App
+		
+		Step 1: Enter App Details
+				App Name: PayRoll Management ( Spaces Allowed)
+				Developer Name: PayRoll_Management (Spaces not allowed, use _ )
+				Description: Description about the application
+		Note: App Name : This is the label name with which application will be displayed on UI.
+			  Developer Name: This is the actual name of the application and developer will be 
+								referring to this application using this.
+		
+		Step 2: Choose the navigation type as : Standard Navigation
+		
+		Step 3: Choose the Utility items that should be displayed on the utility bar.
+				Example: chatter, call, etc.
+		
+		Step 4: Choose the list of tabs that should be displayed in the application.
+		
+		Step 5: Choose the profile, for whom the application should be visable.
+		
+		Edition           No. of Apps can be Created
+		Unlimited         Unlimited Apps
+		Enterprise        10 Apps
+		Developer         10 Apps
+		Professional       5 Apps
+		
+		Multitenant Architecture:
+		------------------------
+		Provides the flexibility to make the multiple customers can access the shared infrastructure.
+		
+		1. Shared Infrastructure: i.e, a single server instance can be utilized by the multiple customers
+		2. Only one platform at a time.
+		
+		Document :
+		----------
+		1. Document is a standard object.
+		2. This object contains files, pdf, images, etc.
+		3. Documents are classified into two types:
+			a. Internal Documents
+			b. Externally available Images.
+		4. Internal Document:
+			a. These documents are shared only with internal users.
+			b. Content of the file is not visible directly.
+			c. We have to manully open the file to see the market.
+		5. Externally Avaiable Images
+		    a. Content of the file is visable to the users directly.
+			b. This document is shared with internal users and externals users.
+		6. Maximum size of the file that we can upload is 5MB.
+		7. If you want to use externally available image as logo of an application size cannot be 
+		more than 20KB.
+		8. Steps to create a new Document Folder.
+			Setup
+			----> Tab Panel
+				----> Click on '+' sign
+					----> Choose Document Tab
+						----> Click on Create New Folder
+			
+			Step 1: Enter the folder Name.
+			Step 2: Specify the Access Level as Read or Read Write.
+			Step 3: Choose the users for whom the access should be given.
+			Step 4: Save.
+		
+		9. Steps to create a New Document
+		Setup
+		----> Tab Panel
+			----> Click on '+' Sign
+				----> Choose the document Tab
+					----> Click on New Button
+			
+			Step 1: Enter Document Name
+			
+			Step 2: Choose the document Type as Internal or externally
+			
+			Step 3: Choose the folder in which documents should be stored.
+			
+			Step 4: Enter Keyboard (Using this keyword we can search for this document from Global Search)
+			
+			Step 5: Choose the file.
+			
+			Step 6: Save
+			
+			Note: Any document which is saved in My Personal Document folder cannot deployed from sandbox to production.
+			Note: Any document which we want to deploy from sandbox to production should be stored in Customer
+			Folder in the sandbox and then deploy to production.
+			
+		Company Information
+		-------------------
+		
+		1. This will specify basic detail about the company like, Currency format, Language, TimeZone.. etc.
+		
+		2. Navigation :
+		   Setup
+		   ----> Administer
+			    ----> Company Profile
+					----> Company Information
+					
+			Step 1: Enter Company Name.
+			
+			Step 2: Choose the default user:
+				He is the primary user or super admin with whom salesforce will contact.
+			
+			Step 3: Default Language and Locale Language:
+				Every organization will have one default language, based on which UI will be displayed.
+			
+			Step 4: Currency Local:
+				a. This will specify the format in which currency of your company should be represented.
+				b. This is also called corporate currency.
+			
+			Step 5: Multiple - Curreny:
+				a. If your company want to support multiple currency we can enable this option.
+				b. Once the option is enabled we cannot disable it.
+				c. Salesforce will provide one table where we are suppose to enter the conversion rates.
+			
+			Step 6: Default Time Zone:
+				a. This will specify the time-zone of your company.
+			
+			Step 7: Organization Id:
+				a. Salesforce will provide 18 characters unique Id for every organization.
+				b. Based on this id salesforce will recognize the instance of your force.com
+				c. ID will start with OOD
+				d. Same Id will be displayed as 15 characters (It is case sensitive)
+			
+			Step 8: Edition:
+				a. This will display the edition of your production.
+			
+			Step 9: Server:
+				a. It will display instance of server what you are using.
+			
+			Step 10: This will specify the information about the used data space and file space.
+			
+			
+		1.Product:
+			a. This object will store information about all the products and services your company is selling.
+				Car             
+				Warranty             
+				Extended warranty
+				Installation      
+				
+		2. PriceBook:	
+			a. It is a collection of products and their prices.
+				Car             800000 MH   850000 UP
+				Warranty             0
+				Extended warranty 5000
+				Installation  
+				
+		3. Campaign:
+			a. This will store information about any event that is planned or conducted to promote the products
+			of the company or brand of the company.
+			
+		4. Lead
+			a. Lead is a person or organization who is showing interest on your products.
+		
+		Lead -> Account, Contact, Oppourtunity.
+		
+		5. Account:
+			a. Account is a name of a organization or a Person with whom we are doing business.
+			
+		6. Contact:
+			a. Person who has influence on the account is called contact.
+			People who work at Account.
+			
+		7. Oppourtunity:
+			a. Any event that can generate the revenue to the company is called oppourtunity.
+			
+		8. Quote:
+			a. This will specify the price for which the product can be sold.
+			
+		9. Order
+		10. Contract
+		11. User
+		12. Profile
+		13. UserRole
+		14. Case
+		15. Solution
+		
+		

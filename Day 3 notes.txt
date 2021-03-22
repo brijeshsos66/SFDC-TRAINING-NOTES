@@ -1,0 +1,391 @@
+Object:
+--------
+	1. Object is nothing but a table.
+	2. Any data we want to store in salesforce, will be saved to object.
+	3. There are two types of objects
+		a. Standard Objects
+		b. Custom Objects
+	4. Standard Objects:
+		a. Any object created by the salesforce to meet the global CRM requirements are called Standard Objects.
+		b. Standard Objects cannot be deleted, they can only be customized.
+		c. Example: 
+			Account, Contact, Document, User, Profile, ......
+	5. Custom Objects:
+		a. Object which are created by the users according to his organizational needs are called Custom Objects.
+		b. All Custom objects will have '_ _ c' after the object Name.
+		c. Custom objects can be modified and deleted as per organizational needs.
+		Example:
+			Customer__c, Loan__c, Payment__c
+	6. Objects will fall under Model part of MVC(Model - View - Container)
+	7. Every object will have three character unique_id, based on his salesforce will recognize the object.
+		
+		Object             ID
+		----------------------
+		Account            001
+		Contact            003
+		User               005
+		Opportunity        006
+		Lead               00Q
+		Contract           800
+		Order              801
+		Case               500
+	8. We can create custom objects in three ways
+		a. Standard Navigation
+		b. Schema Builder
+		c. Metadata SOAP API webservice (WebService program)
+	9. Standard Navigation:
+		a. Classic:
+		Setup
+		----> Build
+			----> Create
+				----> Objects
+					----> New Custom Object
+		b. Lightning:
+		Setup
+		----> Platform Tools
+			----> Objects and Fields
+				----> Object Manager
+					----> Create 
+						----> New Object
+		Step 1: Enter Label : Customer
+			    Note: Objects will be displayed in the UI with this label name.
+		Step 2: Enter Name : Customer
+				Note: This is the actual name of the object and object is referred programmatically using this.
+		Step 3: Enter Pural Label : Customers
+				Note: If your are creating any tab for an object, label that should be displayed on the tab is 
+				called pural Label.
+		Step 4: Context-Sensitive Help:
+				a. One every object salesforce will create one standard link 'Help for this page?' when click on 
+				this link, supporting help document will open, which is called context-sensitive help.
+				b. There are two options:
+					(i) Open the standard salesforce.com help and training window.
+					Note: If you choose this option, salesforce standard help page will open.
+					(ii) Open a window using a Visualforce page/CODE
+					Note: If you choose this option, we can choose any one of the VF page as help page.
+		Step 5: Enter Record Name Label and Format
+				a. On every custom object salesforce will create standard 'Name'.
+				b. This is a required field.
+				c. This field will accept the datatypes of AutoNumber and text.
+				d. Record Name Label: This is label with which name field will be displayed on the UI.
+				e. Auto Number: System will generate the value of the value based on the format given
+					
+					Format  : EID{0000}
+					Start   : 1
+					Example : EID001
+							: EID002
+				f. Text: User has to manually enter the data.
+		Step 6: Optional Feature:
+				These options can be enabled or disabled at any stage of the application.
+				a. Allow Reports:
+					1. If you enable this option we can create reports on the data available in the object.
+				b. Allow Activites:
+					1. If you enable this option we can create events and tasks on the object.
+				c. Track Field History:
+					1. If you enable this option, changes that are made on the data of the field can be tracked.
+				d. Allow in Chatter Groups:
+					1. If you enable this option, this object can be used in the chatter and communities.
+		Step 7: Object Classification:
+				a. This will specify this custom object is created for Enterprise or Lightning.
+				b.  Allow Sharing
+					Allow Bulk API Access
+					Allow Streaming API Access
+					Note: If above three options are enabled then it is designed for enterprise.
+					Note: If you disable any one of the option, then it is designed for lightning application.
+		Step 8: Deployement Status
+				a. In Development: If you enable this option, object is still ready for access.
+									This object can be accessed by admin.
+				b. Deployed: Object is ready for access.
+						   : Object will be accessed based orgranization security model.
+		Step 9: Search Status
+				Allow Search: If we enable this option, data in this object can be searched from global search.
+		Step 10: Object Creation Options:
+				a. These options can be enabled or disabled only at time of creating an object.
+				b. Once's the object is created , we cannot enable or disable the options.
+				c. There are two options:
+					(i) Add notes and Attachments related list to default page layout
+						a. If you enable this option, notes and attachments will be added on the detail page of a record.
+					(ii) Launch New Custom Tab Wizard after saving this custom object.
+						a. If you enable this option, once the object is created, it will take you to tab creation page.
+	10. Schema Builder:
+		Classic:
+		Setup:
+		-------
+		----> Build
+			----> Lightning Bolt
+				----> Schema Builder
+		
+		Lightning:
+		Setup:
+		----> Platform Tools
+			----> Objects and Fields
+				----> Schema Builder
+		Step 1: Choose the Elements
+		Step 2: Drag and drop the object.
+		Step 3: Enter the details and save.
+		
+	11. How many custom objects can be created.
+	ANS: it depends on the edition what we have purchased
+		Edition             Objects
+		Developer            400
+		Enterprise           200
+		Unlimited            2000
+		
+    Tab
+	-----
+	1. Tab is a interface between user and application.
+	2. There are five types of tabs:
+		a. Custom object Tab
+		b. Visualforce Tab
+		c. Web Tab
+		d. Lightning Page Tab
+		e. Lightning component Tab
+	3. Custom Object Tab:
+		a. When we click on this tab, corresponding custom object will be opened.
+		b. On one object, we can create only one tab.
+		c. Same tab can be used in multiple applications.
+		d. Steps to create a custom object tab
+			Classic:
+			Setup
+			----> Build	
+				----> Create 
+					----> Tabs
+						----> New Custom Object Tab
+			Lightning:
+			Setup
+			----> Platform Tools
+				----> User Interface
+					----> Tabs
+						----> New Custom Object Tab
+			Step 1: Choose the object
+			Step 2: Choose the tab style
+			Step 3: Choose the visability of tab
+				a. Choose the profile, for which the tab should be visable.
+					1. Default On:
+					If we enable this option, All users with profile can see the tab on the tabpanel.
+					
+					2. Default Off:
+					If we enable this option, All users with this profile can see the tab, but not on 
+					the tabpanel.
+					They have to click on tabpanel and see the tab.
+					
+					3. Tab Hidden:
+					If we choose this option, tab will not be visable to the profile.
+			Step 4: Choose the applications in which tab should be visable.
+	4. Web Tab:
+		When we click on this tab, web page will be opened.
+	5. Visualforce Tab:
+		When we click on this tab, visualforce page will be opened.
+	6. Lightning Page Tab:
+		When we click on this tab, lightning page will be opened.
+	7. Lightning Component Tab:
+		When we click on this tab, lightning component will be opened.
+		
+Fields:
+-------
+1. Fields are nothing but the columns in the table.
+2. There are two types of fields:
+	a. Standard Fields
+	b. Custom Fields
+3. Standard Fields:
+	a. These are fields created by salesforce.
+	b. Standard fields cannot be deleted.
+	c. Standard fields are classified as two types:
+		a. Standard Fields
+		b. System Fields
+	d.
+		CreatedBy        Data           CreatedBy
+		--------------------------------------------
+		Salesforce       Salesforce     System Fields.
+		Salesforce       User           Standard Fields.
+		
+	e. System Fields:
+		a. These fields are created by salesforce and data is also created by salesforce.
+		b. We can only use the data
+		c. System Fields:
+			1. Id
+			2. isDeleted
+			3. CreatedDate
+			4. LastModifiedDate
+			5. CreatedBy
+			6. CreatedById
+			7. LastModifiedBy
+			8. LastModifiedById
+			9. SystemModStamp
+		d. Id:
+			a. Salesforce by default created 15 characters uniqueId for every record.
+			b. It is case sensitive Id.
+			c. Three more additional characters are added to 15 characters to make it case-insensitive.
+			d. We use 18 characters Id to refer to the record.
+			e. First three charcters in the Id will refer to object.
+			f. Last Four consecutive will refer to record.
+		f. isDeleted
+			a. It is a boolean value.
+			b. When record is deleted, value of this field is set as true.
+			c. Note: any record deleted from the object, will not be deleted permanently.
+			It will stay in the object for next 15 days, then it will be deleted from database.
+		g. CreatedDate:
+			a. It will store data time when the record was created.
+		h. LastModifiedDate
+			a. It will store data and time when the record was lastly modified by the user manually.
+		i. SystemModStamp
+			a. It will store data and time when the record was lastly modified manually or programmatically.
+		j. CreatedBy:
+			a. This will store the user who created the record.
+		k. CreatedById:
+			a. This will store Id of the user, who has created this record.
+		l. LastModifiedBy:
+			a. This will refer to the id of the user who modified the record lastly.
+		m. LastModifiedById:
+			a. This will refer to the id of the user who modified the record lastly.
+		
+		Note: Some of the systme fields are called System Audit Fields, they are CreatedBy, CreatedById,
+		LastModifiedBy, LastModifiedById, CreatedDate, LastModifiedDate, SystemModStamp.
+	
+4. Custom Feilds:
+	1. Fields created by the user are called custom fields.
+	2. These fields can be modified or deleted as per your requirement.
+	3. DataType of Custom Fields
+		a.  Text:
+			Format              : AlphaNumeric
+			MaxLength           : 255 Characters
+			Single/Multiple     : Single
+		b. TextArea:
+			Format              : AlphaNumeric
+			MaxLength           : 255 Characters
+			Single/Multiple     : Multiple Lines
+		c. TextArea (Long)
+			Format              : AlphaNumeric
+			MaxLength           : 1, 31, 072
+			Default Length      : 32,768
+			Single/Multiple     : Multiple
+			Minimum             : 256
+		d. TextArea (Rich)
+			Format              : Formatted Data
+			MaxLength           : 1, 31, 072 Characters
+			Default Length      : 32,768
+			Single/Multiple     : Multiple Lines
+		e. checkbox
+			Format              : Boolean true/false
+		f. Currency
+			Format              : Currency values
+			MaxLength           : 18 characters ( Length of integer + Length of Decimal)
+		g. Date      
+			Format              : This will store data value in the form YYYY-MM-DD
+		h. DateTime
+			Format              : This will store date along with time
+									YYYY-MM-DD HRS-MINS-SECS
+		i. Number          
+			Format              : This will store numerical value, (Decimal, Integers)
+			MaxLength           : 18 characters ( Length of Integer + Length of Decimal)
+		j. Percent
+			Format              : This will append '%' symbil after data
+			MaxLength           : 18 characters (Length of Integer + Length of Decimal)
+		k. Phone
+			Format              : This will store phone numbers.
+		l. Email
+			Format              : This will store email address.
+		m. URL
+			Format              : This will store the url of the page.
+		n. Geolocation
+			Format              : This will store longitude and lattitude.
+		o. PickList
+			1. It is a drop-down list.
+			2. We can select only option at a time.
+			3. We can enter 1000 options.
+			4. Maximum length of each option is 255 characters.
+			5. All options together maximum length is 15,000 characters.
+			6. We can sort the values alphabetically.
+			7. We make the forst option as default option.
+		p. PickList ( Multi-Select)
+			1. It is also a picklist.
+			2. It is used to select more than on option at a time.
+			3. We can enter 150 options in multi-select.
+			4. At max we can select 100 options.
+			5. Length of each option can be 40 characters.
+			6. All options together maximum length is 1500 characters.
+		q. PickList Set:
+			a. If you want to have same set of options on multiple fields then we will create
+			those options as picklist Set.
+			b. Steps to create
+			Setup
+			----> Build
+				----> Create
+					----> PickList Set
+						----> Enter the options
+			Steps to create picklist:
+			Step 1: Choose the datatype  as PickList.
+			Step 2: Enter the Field Name
+			Step 3: Choose the global PickList set option.
+					Choose the picklist set name.
+			Step 4: next
+			Step 5: next
+			Step 6: save
+		r. Text Encrypted:
+			a. If you want to save any sensitive data we use text encrypted datatype.
+			b. Data will be saved to database in the encrypted format.
+			c. By Default no user can see the data in the original format.
+			d. If you want to grant access to user to see the data in the original format 
+			 in the profile, we have give View Encrypted data permission.
+			e. Maximum length of the data is 175 characters.
+6. Standard Navigation:
+	Classic:
+	Setup:
+	----> Build	
+		----> Create
+			----> Objects
+				----> Object Name
+					----> Custom Fields and Relations
+						----> New
+	
+	Lightning:
+	Setup:
+	----> Platform Tools
+		----> Objects and Fields
+			----> Object Manager
+				----> Object
+					----> Fields and Relations
+	Step 1: Choose the datatype
+	Step 2: Enter the field Details
+	Step 3: Next
+	Step 4: Next
+	Step 5: Save
+	Note: Every custom fields will have _ _ c appended to the name.
+
+7. Schema Builder
+	Classic:
+	Setup:
+	----> Build	
+		----> Schema Builder
+			----> Choose the object
+				----> Click on Auto_Layout
+					----> Choose the elements and drag and drop datatype
+	
+	Lightning
+	---------
+	Setup
+	----> Platform tools
+		----> Objects and Fields
+			----> Object Manager
+				----> Schema Builder
+				
+8. Field Dependency :
+--------------------	
+	1. If the value of one field controls the value of another field, we it as field dependency.
+	2. Controlling field can be checkbox or picklist field.
+	Note: In case if you choose picklist as a controlling field, then it cannot have more than
+	300 options.
+	3. Dependency field:
+	Note: This field can be picklist field or Multi-Select Picklist field.
+	4. Steps to create field dependency:
+	Setup
+	----> Build
+		----> Create
+			-----> Object
+				----> Object Name
+					----> Field Dependency
+						----> New
+	Step 1: Choose the controlling field.
+	Step 2: Choose the dependent field.
+	Step 3: Include the options for the controller.
+	Step 4: Save.
+				

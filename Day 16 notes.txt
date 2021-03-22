@@ -1,0 +1,520 @@
+SOQL: Salesforce Object Query Language
+-------------------------------------------
+1. SOQL is similiar to SQL.
+2. Query is a statement used to retrieve the data from the sobject.
+3. Using SOQL we can fetch data from sobject and its associated objects.
+4. SOQL will return LIST of objects are result.
+5. SOQL will return at max 50,000 records.
+6. Using SOQL we can fetch the data from standard objects and custom objects.
+7. Syntax:
+	
+	Select <FieldNames> from <ObjectName>
+		[Where <condition> ]					//optional
+		[Group By <FieldName> ]					//optional
+		[Having <condition> ]					//optional
+		[Order By <FieldNames> ]				//optional
+		[FOR UPDATE]							//optional
+		[Limit <Number of Records>]				//optional
+		[Offset	<Number of Records>]			//optional
+		[ALL ROWS]								//optional
+
+8. Query is a string which we are writing to fetch the data from sobject.
+	Example 1: Write a query to fetch the data from Account
+			
+			Select Name,Phone,Industry from Account
+	
+	Example 2: Write a query to fetch the data from Contact
+			
+			Select LastName, FirstName, Phone, Email from Contact
+	
+	Example 3: Write a query to fetch the data from Lead
+			
+			Select LastName, FirstName, Phone, Email from Lead
+	
+	Example 4: Write a query to fetch the data from Users
+			
+			Select LastName, FirstName, Phone from User
+	
+	Example 5: Write a query to fetch the data from Opportunity
+			
+			Select Name,Amount,StageName from Opportunity
+	
+	Example 6: Write a query to fetch the data from Profile
+			
+			Select Name,Id from Profile
+	
+	Example 7: Write a query to fetch the data from Task
+			
+			Select Subject,Priority,Status from Task
+	
+	Example 8: Write a query to fetch the data from Quote
+			
+			Select Id, ContactId, CreatedDate from Quote
+	
+9. SOQL queries can be executed in 4 ways:
+	
+	1. List<Sobject> result = [ queryString ];
+	2. List<Sobject> result = Database.query(queryString);
+	3. Map<Id,Sobject> result = new Map<Id,Sobject>([queryString]);
+	4. Datebase.QueryLocator result = Datebase.getQueryLocator(queryString);
+	
+10. How to execute the queries
+	a. Developer console Extension
+	UserName
+	----> Developer Console
+		----> Expand the Developer console
+			----> Query Edition
+	
+	b. Debug Anonymous Window:
+	UserName
+	----> Developer Console
+		----> Debug
+			----> Open Execute Anonymous window
+				----> Write the query
+					----> Execute
+	
+	List<Account> accounts = [select id, name, phone from Account];
+	System.debug('Accounts:::::'+accounts);
+	
+	c. Write the queries from Apex classes, Triggers, Javascript, Dataloader, Reports.
+	d. Workbench : It is a third party tool
+		This tool is uesd to retrieve the data from the salesforce account.
+		URL : https://workbench.developerforce.com/
+		Step 1: Choose the Environment
+		Step 2: Choose the api version
+		Step 3: Click on Salesforce login
+		Step 4: Enter the salesforce username / password
+		Step 5: Click on grant access
+		Step 6: From Queries Tab choose sql
+		Step 7: Select object
+		Step 8: Select Fields
+		Step 9: Execute query
+	
+	e. aside.io : Third party tools
+	
+11. SOQL query statements can be created in 2 ways:
+	
+	a. Static Query:
+		1. When we know the following details we can form static query.
+			a. On which object we are writing query.
+			b. On which fields we are writing query.
+			c. We have fixed condition for every execution.
+		2. Let any user run the program, same query if you want to execute then we use static query.
+		3. Example:
+			List<Account> accounts = [ Select Name, Phone, Rating from Account where industry='Banking'];
+	
+	b. Dynamic Query:
+		1. When the fields which you want to query changes based on user interaction.
+					Or
+		2. When the object names changes based on user interaction.
+					Or
+		3. When the condition chnages based on query interactions.
+		
+		4. When the query statement changes time to time or execution to execution based on user interactions
+			then we go for dynamic query.
+		
+		Example:
+			String industryName;
+			String query='Select Name from Account';
+			
+			if(industryName!=''){
+				query = query + 'where industry =\''+industryName+'\';
+			}
+			
+			Note: If you want to execute dynamuc queries then use Dynamic.query(queryString);
+		
+		Example 1: Fetch List of the account records and display in the VF page.
+			Class Name : SOQL_Example_1:
+			----------------------------
+			public class SOQL_Example_1 {
+				public List<Account> accounts { set; get; }
+				public SOQL_Example_1(){
+					accounts = [Select Name, Phone, Industry, Rating from Account];
+				}
+			}
+			
+			VF Page:
+			--------
+			<apex:page controller="SOQL_Example_1">
+				<apex:form>
+					<apex:pageBlock title="Accounts Info">
+						<apex:pageBlockTable value="{!accounts}" var="a">
+							<apex:column value="{!a.name}" />
+							<apex:column value="{!a.industry}" />
+							<apex:column value="{!a.phone}" />
+							<apex:column value="{!a.rating}" />
+						</apex:pageBlockTable>
+					</apex:pageBlock>
+				</apex:form>
+			</apex:page>
+		
+		Example 2: Using Wrapper
+		-------------------------
+		Class : Account_Wrapper
+		Class : SOQL_Example_2
+		------------------------
+		
+		public clss SOQL_Example_2 {
+		 public List<Account_Wrapper> wrapper { set; get; }
+		 public SOQL_Example_2(){
+			wrapper = new List<Account_Wrapper>();
+			List<Account> accounts = [ select id, Name, phone, rating, industry from Account];
+			for(Account a: accounts){
+				Account_Wrapper aw = new Account_Wrapper();
+				aw.acc = a;
+				aw.flag = false;
+				wrapper.add(aw);
+			}
+		}
+		
+		public class Account_Wrapper{
+			public Account acc { set; get; }
+			public Boolean flag { set; get; }
+		}
+	}
+	
+	VF PAGE : SOQL_Example_2
+	--------------------------
+	<apex:page controller="SOQL_Example_2">
+		<apex:form>
+			<apex:pageBlock title="Accounts Info">
+				<apex:pageBlockTable value="{!wrapper}" var="a">
+					<apex:column>
+						<apex:facet name="header"><apex:inputCheckBox /> </apex:facet>
+						<apex:inputCheckBox value="{!a.flag}" />
+					</apex:column>
+					<apex:column value="{!a.acc.name}" />
+					<apex:column value="{!a.acc.industry}" />
+					<apex:column value="{!a.acc.phone}" />
+					<apex:column value="{!a.acc.rating}" />
+				</apex:pageBlockTable>
+			</apex:pageBlock>
+		</apex:form>
+	</apex:page>
+	
+12. Limit:
+-----------
+1. This is a keyword.
+2. This will specify how many records should be returned form the queryResult.
+
+Note: If you want to use variable to speicfy the size then,
+	  Integer size = 10;
+	  Limit : size
+	  
+	  Integer count = 3;
+	  Limit : count
+	 
+	Example: Write a sql to fetch 5 records from Account object.
+	
+		List<Account> accounts = [select Name, Phone, Rating from Account limit 5];
+	
+	Example: Write a sql to fetch 10 records from Contact object.
+		
+			List<Contact> contacts = [select FirstName, LastName, Phone from Contact limit 10];
+	Example: Write a sql to fetch 5 records from Opportunity object.
+		
+			Integer size = 5;
+			List<Opportunity> opty = [select id,name,stageName from Opportunity limit : size];
+
+13. Offset:
+-----------
+1. It is a keyword.
+2. This will specify from which index records should be returned from the queryResult.
+3. Maximum value offset if 2000.
+
+	Note: If you want to use variable in the soql query then use ':'
+		  Integer size = 5;
+		  offset : size
+		  
+		  Integer count = 10;
+		  offset : count
+	
+	Example 1: Write a query to fetch all the accounts from 10th position.
+	
+		List<Account> accounts = [select name, phone, industry from Account offset 10 ];
+	
+	Example 2: Write a query to fetch all the leads from the 5th position.
+		
+		List<Lead> leads = [select id,lastName,firstName from Lead offset 5];
+		
+	Example 3: Write a query to fetch 10 records from 5th position.
+		
+		List<Account> accounts = [select id, Name, Phone from Account limit 10 offset 5];
+
+
+14. ALL ROWS:
+a. This clause is used to fetch all the records from the object.
+b. This will include deleted records also.
+
+	List<Account> accounts = [select id,name,phone from Account ALL ROWS];
+
+15. order by:
+a. This clause is used to sort the data based on a given field in ascending order or descending order.
+b. Syntax : 
+	
+	order by <FieldName> [ASC/DESC]
+	Example:
+	Order by Name ASC
+	Order By Phone DESC
+	Order By industry ASC
+	
+	Example 1: Write a query to fetch all the opportunities in descending order of closedate.
+		
+		List<Opportunity> optyList = [select id, Name, closeDate from Opportunity Order By CloseDate DESC];
+	
+	Example 2: Write a query to fetch all the leads in ascending order createdDate
+		
+		List<Lead> leads = [ select LastName, firstName from Lead order by createdDate ];
+	
+	Example 3: Write a query to fetch all Accounts in the ascending order of Industry and descending order of Phone.
+	
+		List<Account> accounts = [select Name,Phone,Industry from Account order by Industry ASC, Phone DESC];
+	
+	Example 4: Write a query to fetch all opportunities in the ascending order of Name and descending order of CloseDate.
+	
+		List<Opportunity> opportunities = [select Name,Phone,Industry from Opportunity order by Name ASC, CloseDate DESC];
+	
+	Example 5: Write a query to fetch last 10 opportunities which are going to close.
+		
+		List<Opportunity> optylists = [ select name, stagename from Opportunity order by closedate DESC Limit 10];
+	
+	Example 6: Get first 10 opportunities which are closed.
+	
+		List<Opportunity> optyList = [ selct name, stagename from Opportunity order by Closedate ASC limit 10];
+		
+17. Where:
+----------
+1. This clause is used to write conditions in the query.
+2. Syntax:
+	Where <FieldName>[Operator]<Value>
+	Note: Comparision operator can be (=,!=,<,<=,>,>=,LIKE, IN, INCLUDES,EXCLUDES)
+	Example:
+		Where name='Sam';
+		Where industry!='banking';
+		Where amount > 5000;
+		Where salary__c < 40000;
+	
+	Note: If you want to write multiple conditions
+	Where <FieldName1> [Operator]<Value> [Logical Operator] <FieldName2> [Operator]<Value>
+	Note: Logical Operator (AND, OR, NOT)
+		Where Name = 'Kiran' and Industry!='Banking'
+		Where Amount>50000 or rating='Hot'
+	
+	Example 1: Write a query to fetch all the account whose industry is Banking.
+	
+		List<Account> accounts = [ select id,Name,Phone from Account where industry='Banking'];
+	
+	Example 2: Write a query to fetch all the opportunities whose stageName is not closed won.
+		
+		List<Opportunity> optyList = [select id, Name, stageName from Opportunity where stageName!='Closed Won'];
+	
+	Example 3: Write a query to fetch all the leads whose rating is Hot
+	
+		List<Lead> leads = [select lastName, FirstName from Lead where rating='Hot'];
+	
+	Example 4: Write a query to fetch all the Opportunity whose amount is more then 50k and less then 90k.
+	
+		List<Opportunity> optyList = [select id,name,amount from Opportunity where amount>50000 and amount < 90000];
+	
+	Example 5: Write a query to fetch all the Leads whose industry is Energy or leadsource is Web.
+	
+		List<Lead> leads= [select id,lastname,firstName from Lead where industry='Energy' or LeadSource='Web'];
+
+18. Like:
+--------
+1. This clause is used to compare the string values.
+2. _(Underscore) : this will accept any one character.
+3. %(percentage): this will accept any number of character.
+
+	Example 1: Fetch all the accounts whose name is ending with 's'.
+		
+		List<Account> accounts = [ select id, Name, Phone from Account where name like '%s'];
+	
+	Example 2: Fetch all the accounts whose name starts with 's'.
+		
+		List<Account> accounts = [ select id, Name, Phone from Account where name like 's%'];
+	
+	Example 3: Fetch all the products whose second character is s and fourth character is n.
+		
+		List<Product2> Products = [ select id, Name, Phone from Product2 where name like '_s_n%'];
+	
+----------------Static Query--------------------------------EX-------------------------------------------
+
+public class SOQL_Example_2 {
+	public List<Account> accounts { set; get; }
+	public SOQL_Example_2(){
+		accounts = [ select Id, Name, Industry, Phone from Account ];
+	}
+	public void limit5(){
+		accounts = [select Id,Name, Industry,Phone from Account limit 5];
+	}
+	
+	public void limitCount(){
+		Integer count = 2;
+		accounts = [select Id,Name, Industry,Phone from Account limit : count];
+	}
+	
+	public void offset5(){
+		accounts = [select Id,Name, Industry,Phone from Account offset 5];
+	}
+	
+	public void offsetCount(){
+		Integer count = 8;
+		accounts = [select Id,Name, Industry,Phone from Account offset : count];
+	}
+	
+	public void limitOffset(){
+		accounts = [select Id,Name, Industry,Phone from Account limit 3 offset 5];
+	}
+}
+
+<apex:page controller="SOQL_Example_2">
+	<apex:form>
+		<apex:pageBlock title="Accounts">
+			<apex:pageBlockButtons location="top">
+				<apex:commandButton value="limit5" action="{!limit5}" reRender="pb" />
+				<apex:commandButton value="limitCount" action="{!limitCount}" reRender="pb" />
+				<apex:commandButton value="offset5" action="{!offset5}" reRender="pb" />
+				<apex:commandButton value="offsetCount" action="{!offsetCount}" reRender="pb" />
+				<apex:commandButton value="limitOffset" action="{!limitOffset}" reRender="pb" />
+			</apex:pageBlockButtons>
+			<apex:pageBlockTable value="{!accounts}" var="a" id="pb">
+				<apex:column value="{!a.name}" />
+				<apex:column value="{!a.phone}" />
+				<apex:column value="{!a.industry}" />
+			</apex:pageBlockTable>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+
+----------------Dynamic Query --------------------------------------Ex------------------------
+public class SOQL_Example_4 {
+	public String name { set; get; }
+	public String industry { set; get; }
+	public List<Account> accounts { set; get; }
+	public String query { set; get; }
+	public void search(){
+		query = 'select id, Name,Phone,Industry,rating from Account';
+		if(name!=''&&industry!=''){
+			query=query+'where name=\''+name+'\'and industry=\''+industry+'\'';
+		}else{
+			if(name!=''){
+				query=query+' where name=\''+name+'\'';
+			}else{
+				if(industry!=''){
+					query=query+'where industry=\''+industry+'\'';
+				}
+			}
+		}
+		accounts = Database.query(query);
+	}
+}
+
+<apex:page controller="SOQL_Example_4">
+	<apex:form>
+		<apex:pageBlock title="SOQL_Example">
+			<apex:pageBlockButtons location="top">
+				<apex:commandButton value="Search" action="{!search}" />
+			</apex:pageBlockButtons>
+			<apex:pageBlockSection>
+				<apex:pageBlockSectionItem>
+					<apex:outputLabel value="Enter Name:"/>
+					<apex:inputText value="{!name}" />
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem>
+					<apex:outputLabel value="Enter Industry:"/>
+					<apex:inputText value="{!industry}" />
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+			<apex:pageBlockTable value="{!accounts}" var="a">
+				<apex:column value="{!a.name}" />
+				<apex:column value="{!a.industry}" />
+				<apex:column value="{!a.rating}" />
+				<apex:column value="{!a.phone}" />
+			</apex:pageBlockTable>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+
+------------------------------------------------------------------------------------------
+
+public class SOQL_Example_5 {
+	public List<SelectOption> options { set; get; }
+	public List<String> selected { set; get; }
+	public String query { set; get; }
+	public List<Account> accounts { set; get; }
+	public SOQL_Example_5(){
+		selected = new List<String>();
+		options = new List<SelectOption>();
+		List<String> fields = new List<String>{'Name','Phone','Industry','Rating','Ownership'};
+		for(String s: fields){
+			SelectOption op = new SelectOption(s,s);
+			options.add(op);
+			}
+		}
+	
+	public void search(){
+		query = 'select id';
+		if(selected.size() > 0){
+			for(String s : selected){
+				query = query+','+s;
+			}
+			query = query + 'from Account';
+			accounts = Database.query(query);
+		}
+	}
+}
+
+<apex:page controller="SOQL_Example_5">
+	<apex:form id="one">
+		<apex:selectList multiselect="true" value="{!selected}" style="height:100px;width:100px;">
+			<apex:selectOptions value="{!options}" />
+		</apex:selectList>
+		<apex:commandButton value="Submit" action="{!search}" reRender="one" />
+		<br/><br/>
+		<apex:pageBlock mode="mainDetail" rendered="{! !ISNULL(accounts)}">
+			<apex:pageBlockTable value="{!accounts}" var="a">
+				<apex:repeat value="{!selected}" var="fld">
+					<apex:column value="{!a[fld]}" />
+				</apex:repeat>
+			</apex:pageBlockTable>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+
+--------------Parent Child Relationship----------------------------------------------------
+
+public class SOQL_Parent_Child {
+	public List<Account> accounts { set; get; }
+	public List<Contact> contacts { set; get; }
+	public List<Opportunity> optyList { set; get; }
+	public List<Case> cases { set; get; }
+	public SOQL_Parent_Child(){
+		accounts = [select Id,Name,Phone,(Select LastName, FirstName from Contacts),(select id,name,Amount from Opportunities),
+					(select subject,Type,Prority from cases) from Account];
+			}
+		}
+
+<apex:page controller="SOQL_Parent_Child">
+	<apex:form>
+		<apex:pageBlock title="Accounts">
+			<apex:pageBlockTable value="{!accounts}" var="a">
+				<apex:column value="{!a.name}" />
+				<apex:column value="{!a.phone}" />
+				<apex:column headerValue="Contacts">
+					<apex:dataTable value="{!a.contacts}" var="c">
+						<apex:column value="{!c.lastName}" />
+						<apex:column value="{!c.firstName}" />
+					</apex:dataTable>
+				</apex:column>
+				<apex:column headerValue="Opportunities">
+					<apex:dataTable value="{!a.opportunities}" var="p">
+						<apex:column value="{!p.name}"/>
+						<apex:column value="{!p.amount}"/>
+					</apex:dataTable>
+				</apex:column>
+			</apex:pageBlockTable>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+

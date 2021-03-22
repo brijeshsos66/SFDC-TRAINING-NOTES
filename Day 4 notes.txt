@@ -1,0 +1,208 @@
+Formula
+-------
+a. It is a datatype.
+b. This datatype is used when we want the system to generate the value based on the business logic.
+c. There are 2 types of it:
+	1. Simple Formula
+	2. Advanced Formula
+d. Simple Formula:
+	If you want to wrtie a simple rule using the fields of the record, with simple operators we will use simple formula.
+e. Advanced Formula:
+	If you want to write complexed rule, using the fields of the records, and its master fields using the pre-defined functions we will go for advanced formula.
+f. Every formula we write in the salesforce will give you result in the form of:
+	a. CheckBox
+	b. Currency
+	c. Date
+	d. DateTime
+	e. Number
+	f. Percent
+	g. Text
+	h. Time
+g. Pre-defined functions:
+	a. TODAY() : This will return the today date.
+	b. NOW()   : This will return current date time.
+	c. MONTH(date) : This will return month in the given date.
+	d. YEAR(date)   : This will return Year in the given date.
+	e. DAY(date)   : This will return day in the month.
+	f. DateValue(datetime) : This will return date from the datetime.
+	g. TimeValue(Date/Time): This will return time from Date and Time: HH:MM:SECS:MSECS
+	h. HOURS(Time) : This will return hours.
+	i. WEEKDAY(Date) : This will return day in the week.
+	Monday: 0, Sunday: 1, &.., Saturday : 7
+	--------------------------------------------------------------------------
+	
+	ISNULL(value) : If value if NULL, it will return true.
+					This is used for numerical fields.
+	ISBLANK(value) : This will return true, if the value is blank.
+					 This is used for text field.
+	SYNTAX: IF(cond,value1,value2)
+	-------------------------------
+	If the cond is true, value1 is given and else value2 is given.
+	
+	(Q)
+	Object: Lead
+	Return: Number
+	Rule  : Field Name            ISNULL/Blank         NotBlank/NotNull
+			Email                 0                    10
+			Phone                 0                    10
+			FirstName             0                    10
+			AnnualRevenue         equals to zero 0 points, more than zero 20 points.
+			
+			Email: cts@gmail.com   10
+			FirstName = cts        10
+			AnnualRevenue = 25     20
+	(A) using IF conditional
+	
+			IF(ISBLANK(Email), 0 ,10) + 
+			IF(ISBLANK(Phone), 0 ,10) +
+			IF(ISBLANK(FirstName), 0, 10) +
+			IF(AnnualRevenue > 0,20, 0)
+    
+	(Q) Use Case 2
+	Object: Lead
+	Fields: Rating
+	Rule :  LeadScore          Rating
+			10 				   1 star
+			20				   2 star
+			30				   3 star
+			40 				   4 star
+			50				   5 star
+			
+	IMAGE( 
+CASE( Revenue__c , 
+50, "/img/samples/stars_500.gif ", 
+40, "/img/samples/stars_400.gif", 
+30, "/img/samples/stars_300.gif", 
+20, "/img/samples/stars_200.gif", 
+10, "/img/samples/stars_100.gif", 
+"/img/samples/stars_000.gif"), 
+"0 stars")
+	
+	UseCase: 3
+	Object: Oppourtunity
+	Field : Age
+	Rule  : This will calculate how many days back the record was created.
+	
+	(A) TODAY() - DATEVALUE(CreatedDate)
+	
+	UseCase : 4
+	Object : Loan__c
+	Fields: FieldName       DataType
+			Type			PickList -- Housing, Personal, Vehicle.
+			Security		PickList -- Salary, Assert
+			AppliedDate		Date
+			AppliedAmount	Currency  1000
+			AsserCost		Currency
+			
+			Formula:
+			1. Calculate the rate of interest
+			Rule : Type      Interest
+				   Education  12%
+				   Housing    10%
+				   Personal   11%
+				   
+			CASE(Type__c,
+				'Education',0.12,
+				'Housing',0.10,
+				'Personal',0.11,
+				0
+				)
+				
+			
+		    2. Calculate the no. of EMI's
+			Rule:  Type      EMI
+				   Education  48
+				   Housing    120
+				   Personal   32
+				   
+			CASE(Type__c,
+				'Education', 48,
+				'Housing', 120,
+				'Personal', 32,
+				0
+				)
+		
+			ISPICKVAL(PickList, value):
+			This will return true, if the option what we have selected in the picklist fields is same
+			literal what we have given.			
+	
+	3. Create Formula to calculate the max sanctioned amount
+	Rule:    Security is salary and type is education 24 times of 80% of salary
+			 Security is salary and type is housing 80 times of 60% of salary
+			 Security is salary and type is Personal 20 times of 40% of salary
+		
+	Example: ISPICKVAL(City__c, 'Pune')
+	
+	IF(ISPICKVAL(Security__c, 'Salary'),
+	  CASE(Type__c,
+		'Education', 24*0.80*salary__c,
+		'Housing', 80*0.60*salary__c,
+		'Personal',20*0.40*salary__c,
+		0
+		),
+		AssertCost__c*0.60
+		)
+
+	4. Create a formula to calculate interest
+		
+		(SanctionedAmount * NoOfMonths/12 * rate)
+		
+	5. Calculate the total amount
+	
+		SanctionedAmount + Interest
+	
+	6. Calculate EMI
+	
+		Total / NoOfMonths
+
+Rollup - Summary:
+---------------------
+	1. This field can be created only on Master object in Master-Detail relation.
+	2. This is used to create Aggregate operations on corresponding child records.
+	3. Aggregate functions can be:
+		a. count : This will return count of the no. of record participating in the relation.
+		b. Sum(field): This will return summarized value of given field from the coreesponsing child records.
+					We can perform this operation on Numerical, Currency, Percent.
+		c. Min(field): This will return minimum value of given field from the corresponding child records.
+					We can perform this operation on Numerical, Currency, Percent, Date, DateTime.
+		d.Max(field): This will return maximim value of given field from the corresponding child records.
+					We can perform this operation on Numerical, Currency, Percent, Date, DateTime.
+	4. We can specify which child records should be part of rollup-summary.
+		a. Include all the child record in the operation:
+		If you choose this aggregate operation will be performed on all the child records.
+		b. Include only those child records which are meeting the given condition.
+	5. We can create 25 rollup summary fields on the object.
+	UseCase :
+		1. Create Custom Object : Loan
+		2. Create the following fields:
+					Field Name        Datatype
+					LNO               AutoNumber
+					Type              PickList ( Education, Housing)
+					Customer Name     Text
+		3. Create a Custom Object : Payment
+		4. Create the following fields:
+					Field Name		  DataType
+					PaymentId		  AutoNumber
+					Amount			  Currency
+					Mode			  PickList ( Online, Cash)
+					Loan			  Master-Detail (Loan)
+		5. Create RollupSummary Field
+		Object				: 	Loan
+		Field Name			:	Total Amount
+		Child Object		: 	Payments
+		Operation Type		:	Sum(amount)
+		Which Records		:	All Child Records
+		
+		6. Create RollupSummary field
+		Object 				: 	Loan
+		Field Name			:	Total Online Amount
+		Child Object		: 	Payments
+		Operation Type		:	Sum(amount)
+		Which Records		:	Only those payments records whose mode of payment is Online.
+		
+		7. Create RollupSummary field
+		Object 				: 	Loan
+		Field Name			:	Total Cash Amount
+		Child Object		: 	Payments
+		Operation Type		:	Sum(amount)
+		Which Records		:	Only those payments records whose mode of payment is Cash.

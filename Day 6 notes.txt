@@ -1,0 +1,265 @@
+AccountTeams:
+---------------------
+	1. On Account we can have only user as owner.
+	2. If you want group of users to collaborate and work more effectively, then we use AccountTeams.
+	3. Every AccountTeamMember will have role assigned.
+	4. AccountTeamMember will get access on Account record and corresponsing child opportunites, cases.
+	5. Every user can view one default AccountTeam.
+	6. Steps to enable AccountTeams:
+		Setup:
+		----> Build
+			----> Customize
+				----> Account
+					----> AccountTeams
+						----> Enable
+							----> Add then PageLayout
+	7. Test
+		Open any one of the Account Record Detail Page.
+		Add TeamMember from the default Team.
+	8. How to create account default Team.
+		Setup:
+		----> Administer
+			----> Manager Users
+				----> Users
+					----> Account Default Team
+						----> Add the users
+	
+PageLayouts:
+--------------
+	1. This will specify how an object should be visable to a profile.
+	2. This will control
+		a. Fields
+		b. Order of the fields
+		c. Visability of the fields
+		d. Buttons
+		e. Related List
+		f. Fields in the related list
+	3. Every profile by default will have one pagelayout.
+	4. When we create custom object, salesforce automatically create one standard PageLayout with name of
+	   CustomObjectName+'Layout'
+	   Example:
+		  Object Name			PageLayout
+		  Customer				Customer Layout
+		  Loan__c				Loan Layout
+	
+	Date Security Model:
+	--------------------
+	1. Object Level Security
+		a. Profile Level Security
+		b. Permission Set
+	
+	2. Record Level Security
+		a. OWD (Organization Wide Default)
+		b. Role Hierarchy
+		c. Sharing Rules
+		d. Profile and Permission set view All
+		e. AccountTeams
+		f. Opportunity Teams
+		g. Case Teams
+		h. Territories Level Security
+	
+	3. Field Level Security:
+		a. Profile
+		b. Permission Set
+		c. PageLayout
+		d. RecordType
+		
+	1. Object Level:
+	-----------------
+		a. Object Level permissions are controlled by profile.
+		b. Profile will decide what CRUD operations user perform on the object.
+			Example:
+			a. Create a custom object: Customer
+				Field Name				Datatype
+				Name					AutoNumber CID{000}
+				LastName				Text
+				First Name				Text
+				Phone					Phone
+				City					PickList (Hyd, Ban, Che)
+			b. Create a Tab for a Object.
+			c. Create a Profile: Recuriter
+				
+				a. Grant Read, Create access on Customer Object.
+			
+			d. Create a user wilson, with recuriter profile and see what operation he can perform on customer.
+		c. Permission Set:
+			1. Using Permission set also we can control the access on the object.
+			Example:	
+				a. Create a Permission set Recuriter Permissions.
+				b. GoTo object settings
+					1. Enable Read, Edit, Delete on Customer Object.
+				c. Assign this permission set to the wilson and check the access on the object.
+
+Record Level Access:
+----------------------
+
+OWD: Organization wide default settings
+1. This will specify minimum level of access that every user has on the record.
+2. There are six types of OWD:
+	a. Private
+	b. Public Read
+	c. Public Read/Write
+	d. Public Read/Write/Transfer
+	e. Public Full Access
+	f. Controlled by Parent
+3. On a record we can perform Read, Edit, Delete, Transfer.
+4. Example: Customer Object
+	CustomerId		Owner
+	-----------------------------
+	C001			Sam
+	C002			Ram		
+	C003			Kiran
+5. OWD: Private :
+	a. If you define owd as private on a object, only owner can access the record and no other user can see the record.
+	b. Owner can perform Read/Edit/Delete/Transfer operation on the record.
+	Example:
+			LoggedIn			Records
+			----------------------------------------------
+			Sam					C001---Sam: R/W/D/T
+			Kiran				C003---Kiran: R/W/D/T
+6. OWD: Public Read :
+	a. If you define OWD as Public Read on a object, Every user can access every record in the object.
+	b. Owner can perform Read/Edit/Delete/Transfer on the record.
+	c. Other user can only read the data from the record.
+		Example:
+		
+		LoggedIn			Records
+		---------------------------------------------------
+		Sam					C001---Sam    : R/W/D/T
+							C002---Ram    : R
+							C003---Kiran  : R
+		
+		Kiran				C003---Kiran  : R/W/D/T
+							C001---Sam    : R
+							C002---Ram    : R
+		
+7. OWD: Public Read/Write
+	
+	a. If you define OWD as Public Read/Write on a object, Every user can access every record in the object.
+	b. Owner can perform Read/Edit/Delete/Transfer on the record.
+	c. Other user can only read and write on the record.
+
+	Example:
+	
+	LoggedIn			Records
+		---------------------------------------------------
+		Sam					C001---Sam    : R/W/D/T
+							C002---Ram    : R/W
+							C003---Kiran  : R/W
+		
+		Kiran				C003---Kiran  : R/W/D/T
+							C001---Sam    : R/W
+							C002---Ram    : R/W
+
+8. Public Read/Write/Transfer : 
+	a. This permission can be given only on Lead and Case object.
+	b. If you define OWD as Read/Write/Transfer, every user can access every record in the object.
+	c. Owner of the record can perform Read/Edit/Delete/Transfer operation on the record.
+	d. Other users can perform Read/Edit/Transfer operation on the record.
+	
+		Example:     Lead
+		
+		FirstName		Owner
+		------------------------------------------
+		Satish			Kiran
+		Ramesh			Prasad
+		Naveen			Ram
+		
+		LoggedIn		Records
+		------------------------------------------
+		Kiran			Satish---Kiran  : R/W/D/T
+						Ramesh---Prasad : R/W/T
+						Naveen---Ram 	: R/W/T
+		
+		Ram				Satish---Kiran  : R/W/T
+						Ramesh---Prasad : R/W/T
+						Naveen---Ram    : R/W/D/T
+
+9. Public Full Access:
+	a. This is available only on campaign object.
+	b. If you define OWD as public Full Access, every user can access every record and perform R/W/D/T on every record.
+
+10. Controlled By Parent:
+	a. When two objects are connected by Master-Detail relation, child object will have owner field.
+	b. When we select controlled by Parent, owd applied on master object will be applied on child object.
+	
+11. Navigation:
+	Setup
+	----> Administer
+		----> Security Controllers
+			----> Sharing Settings
+				----> OWD
+					----> Edit
+	
+12. Grant Access Using Role Hierarchy:
+	a. If you enable this option, all the users who standing above you in role hierarchy, can access all the records that 
+		are visible to you.
+	b. All the users who are standing above you can perform read/write/delete/transfer operations on those records are accessible
+		to you.
+	c. By default this option is enabled on all standard object.
+	d. On Custom objects we can enable or disabled the option, based on the requirement.
+
+13. Profile Level : View All and Notify All
+--------------------------------------------
+	View All : If you define view All permisssion on a object for a profile.
+			   All users with this profile can perform read operation on every record.
+	ModifyAll : If you define modify all permission for a profile.
+				All users with this profile can perform read/write/delete/transfer operation on every record.
+	Modify All Data: If you enable this option for a profile, all the users with the profile can see every 
+					 record in every object in the organiztion and perform Read/Edit/Delete/Transfer operations.
+	View All Date : If you enable this option for a profile, all the users with profile can see every record
+					in the organiztion and perform Read.
+
+14. Sharing Rules:
+------------------
+	a. These are used to grant extra access on the records apart from what user is already able to see using OWD.
+	b. There are four types of sharing rules:
+		a. Owner-Based Sharing Rules
+		b. 
+
+Field Level Permission:
+------------------------
+
+	1. Profile Level
+	2. Permission Set
+	3. PageLayout
+	
+	Visable 			ReadOnly
+	-----------------------------------------
+	Ok					NO           ---Read/Write
+	Ok					Ok			 ---Read Access
+	NO 					Ok			 ---Not Allowed
+	NO					NO			 ---Not Visable
+
+   a. Field Level Security is defined with the combination of PageLayout and profile.
+				Profile								PageLayout
+		------------------------------------------------------------------------------------
+		Visable			Read					Visable				Read
+		------------------------------------------------------------------------------------
+		No 				No						Yes					No 			---Not Visable
+												Yes					Yes			---Not Visable
+												No 					No			---Not Visable
+		
+		Yes				No						No					No			---Not Visable
+												Yes					No 			---Read/Write
+												Yes					Yes			---Read
+		
+		Yes				Yes						No 					No			---Not Visable
+												Yes					Yes			---Read
+												Yes					No			---Read
+		
+		Note: At the time of creating of field if we define field as required, then it will be required on all the pagelayouts.
+		
+		Note: At the time of Creating a pagelayout if we define field as required it is required on only on that particular field as required.
+		
+Setup
+----> Administer
+	----> Security Controllers
+		----> Field Accessibility
+			----> Choose the object
+				----> Choose the fields / Profiles.
+				
+
+					 
+	
+		

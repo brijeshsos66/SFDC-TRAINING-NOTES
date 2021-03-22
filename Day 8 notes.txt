@@ -1,0 +1,92 @@
+Product:
+--------
+1. Any service or item, your company is selling is called product.
+2. Information about all the products are stored in Product object.
+3. Internally we have standard object Product2
+
+Pricebook:
+----------
+1. It is list of products with their corresponding prices.
+2. There are two types of Pricebooks:
+	a. Standard Pricebook
+	b. Custom Pricebook
+3. Standard Pricebook:
+	a. It is a list of all the products with corresponding standard prices.
+4. Custom Pricebook:
+	a. There are the pricebooks created by user as per business requirement.
+	b. Steps to create custom Pricebook
+	   Tabpanel
+	   ----> Click on '+' sign
+			----> Pricebooks
+				----> New Pricebook
+5. PricebookEntry:
+	a. It is a juntion object between pricebook and product.
+
+6. Campaign:
+------------
+	a. Any event that you do to promote the products of your company is called campaign.
+	b. Technical Terms
+		a. Mode of Campaign
+		b. Targeted Segment
+		c. Targeted Segment data source.
+		d. Budget
+	c. Campaign Hierarchy:
+		a. This will specify the relation between the campaigns.
+	d. Campaign Influence: This will specify
+		a. No. of leads/contacts recieved due to this campaign.
+		b. No. of opportunites/Amount recieved due to this campaining.
+	e. Campaign Members:
+		Leads and contacts recieved due to the influence of this campaign is called campaign members.
+
+7. Lead:
+--------
+	a. Any person or organization who is showing interest on your product is called lead.
+	b. Technical terms we had
+		a. Web-to-Lead
+		b. Lead Assignment Rules
+		c. Lead AutoResponse Rules
+		d. Lead Process
+		e. Lead Conversion
+	c. Web-to-Lead:
+		Setup:
+		----> Build
+			----> Customize
+				----> Leads
+					----> Web-to-Lead
+		
+		Step 1: Enable web-to-Lead
+		Step 2: Choose the default created by user.
+		Step 3: Save
+		Step 4: Generate the web form
+		Step 5: Select the fields
+		Step 6: Give callback url
+		Step 7: Save
+		Step 8: Copy the HTML code generated and save as .html file.
+	
+	d. Lead Assignment Rule:
+		a. This will specify who should be the owner of the record based on your business requirement.
+	e. Lead AutoResponse Rule:
+		a. This will specify which email template should be sent to the customer when lead is created from website.
+	f. Lead Process:
+		a. This will specify the life cycle that lead will under go.
+		b. Using Lead process we will control the options in status picklist field.
+	g. Lead Conversion:
+		a. When we click on convert button on the lead, lead will be converted into account, customer, Opportunity.
+		b. If you don't want the lead to be converted into opportunity, we can enable it check box donot create opportunity.
+
+8. Accounts:
+-------------
+	a. Any person or organization with whom you are doing a business is called Account.
+	b. There are two types of accounts:
+		a. Personal
+		b. Organization
+	c. By default salesforce will provide organization accounts.
+	d. If you want to personal account, we need to raise a case with salesforce team.
+
+
+Approval: Learn from the TrialMixes.
+--------
+
+
+
+		

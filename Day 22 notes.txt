@@ -1,0 +1,306 @@
+JavaScript:
+===========
+
+<apex:page>
+	<script>
+		//All the scripting elements will be defined with in the script tag
+		var name = 'raja';
+		var age = 30;
+		var salary = 40000;
+		var flag= true;
+		var names = ['sam','Ram'];
+		console.log('Testing');
+		alert('This is testing');
+	</script>
+</apex:page>
+
+================================================================
+<apex:page>
+	<script>
+		function functionName(parameters){
+			return value;
+		}
+		function call(){ }
+		function invoke(name) {}
+		function show(lastName, firstName){ }
+		function callMe(age, salary) {
+			return salary;
+		}
+	</script>
+</apex:page>
+==================================================================
+<apex:page>
+	<script>
+		function call(){
+			alert('Iam call method from JS');
+		}
+		function invoke(){
+			alert('Iam invoke method from JS');
+		}
+	</script>
+	<apex:form>	
+		<apex:commandButton value="Submit" onclick="call()" />
+		<apex:commandButton value="Cancel" oncomplete="invoke()" />
+	</apex:form>
+</apex:page>
+
+==============================================================================
+public class JavaScript_Example{
+	public String name { set; get; }
+	public JavaScript_Example(){
+		name = 'PUNE';
+	}
+}
+---------------------------------------------------------
+<apex:page controller="JavaScript_Example">
+	<script>
+		function show(name){
+			alert('This is my name: '+name);
+	</script>
+	<apex:form>
+		<apex:commandButton value="Submit" onclick="show('Testing')" />
+		<apex:commandButton value="Cancel" onclick="show('{!User.LastName}')" />
+		<apex:commandButton value="Invoke" onclick="show('{!name}')" />
+	</apex:form>
+</apex:page>
+======================================================
+<apex:page>
+	<script>
+		function call(){
+			return 'Pune';
+		}
+		function show(){
+			var name = call();
+			alert(name);
+		}
+	</script>
+	<apex:form>
+		<apex:commandButton value="Submit" onclick="show()" />
+	</apex:form>
+</apex:page>
+
+===============================================================
+public class JavaScript_Example_2 {
+	public String name { set; get; }
+	public String result { set; get; }
+	public void call(){
+		result = 'Your Name: '+name;
+	}
+}
+------------------------------------------------------------
+<apex:page controller="JavaScript_Example_2" id="page">
+	<apex:form id="fm">
+		<apex:inputHidden id="hid" value="{!name}" />
+		<apex:commandButton value="Submit" onclick="show()" action="{!call}" reRender="one" />
+		<apex:outputLabel value="{!result}" id="one" />
+		<script>
+			function show(){
+				document.getElementById('page:fm:hid').val='Ravi Kiran';
+			}
+		</script>
+	</apex:form>
+</apex:page>
+
+FUTURE ANNOTATION:
+--------------------
+1. If any one of the statements are taking longer time, then we use future method to run them independently from the rest of the transaction.
+2. Statements which may take longer time are:
+	a. Bulk DML Operation
+	b. Webservice callouts
+3. Rules to define future method.
+	a. Every method should have @future annotation.
+	b. method should be static.
+	c. return type is void.
+	d. Accepts all the parameters expect sobjects.
+	e. If you want to call the webservice then we define @future(callout = true)
+4. Any synchronous job that is running in the salesforce will be registered with queue.
+5. Future method cannot be invoked from another future method.
+
+public class Future_Example_1 {
+	@future
+	public static void call(){
+		System.debug('Call One');
+		System.debug('Call Two');
+		System.debug('Call Three');
+	}
+	@future
+	public static void invoke(){
+		System.debug('Invoke One');
+		System.debug('Invoke Two');
+		System.debug('Invoke Three');
+	}
+	public void show(){
+		System.debug('Show One');
+		System.debug('Show Two');
+		call();
+		System.debug('Show Three');
+		System.debug('Show Four');
+		invoke();
+		System.debug('Show Five');
+		System.debug('Show Six');
+		call();
+	}
+}
+
+===============================================================
+Future_Example_1 fe = new Future_Example_1();
+fe.show();
+---------------------------------------------------------------
+
+Queueable:
+==========
+
+public class Queue_Example implements Queueable {
+	public void execute(QueueableContext ac) {
+		List<Account> accounts = [ select id, name from Account where createdDate=THIS_MONTH];
+		}
+	}
+---------------------------------------
+public class Queue_Example implements Queueable {
+	public void execute(QueueableContext bc) {
+		List<Account> accounts = [ select id, name from Account where createdDate=THIS_WEEK];
+		}
+	}
+==============================anonymous window==============
+
+Queue_Example qe = new Queue_Example();
+Id jobId = System.enqueueJob(qe);
+
+============================================================
+
+public class Queue_Example_2 implements Queueable{
+	public void execute(QueueableContext qc){
+		List<Opportunity> optyList = [ select id, stagename from Opportunity where stagename!='Closed Won'];
+		for(Opportunity op: optyList){
+			op.stageName = 'Transfer';
+		}
+		update optyList;
+		Queue_Example qe = new Queue_Example();
+		Id jobId = System.enqueueJob(qe);
+		}
+	}
+
+FieldSets:
+==========
+
+public class Sample{
+	public Project__c proj { set; get; }
+	
+	public Sample(){
+		this.proj = new Project__c();
+	}
+	
+	public List<Schema.FieldSetMember> getFields(){
+		return SObjectType.Project__c.FieldSets.Quick_Fields.getFields();
+	}
+}
+
+------------------------------------------------------------
+<apex:page controller = "Sample">
+	<apex:form>
+		<apex:pageBlock title="Project">
+			<apex:pageBlockSection>
+				<apex:repeat value="{!fields}" var="f">
+					<apex:inputFields value="{!proj[f.fieldPath]}" />
+				</apex:repeat>
+			</apex:pageBlockSection>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+
+==================================================
+List<Schema.FieldSetMember> fieldList = SObjectType.Project__c.FieldSets.Quick_Fields.getFields();
+
+system.debug('fieldList::::'+fieldList);
+
+==================================================
+
+Custom Labels:
+-------------
+Custom labels enable developers to create multilingual applications by automatically presenting
+information ( for example, help text or error messages) in a user's native language. Custom lables 
+are custom text values that can be accessed from Apex classes, Visualforce pages, or Lightning componenets.
+The values can be translated into any language salesforce supports.
+
+We can create upto 5,000 custom labels for your organization, and they can be upto
+1,000 characters in length.
+
+==============================================================
+<apex:page standardController="Account">
+
+<h1> Example for Custom Labels </h1>
+
+<apex:outputLabel value="{!$Label.Message}" />
+</apex:page>
+
+================================================
+String msg = System.Label.Message;
+
+============================================================================
+Global Actions:
+
+Create, edit, and view global actions, which can be used on detail pages, the home page, and the chatter tab.
+
+======================================================================================
+$Action:
+--------
+A global merge field type to use when referencing standard salesforce actions suhc as displaying
+the accounts tab home page, creating new accounts, editing accounts, and deleting accounts.
+
+$Api:
+----
+A global merge field type to use when referencing API URL's. 
+Usage
+Use dot notation to specify an API URL from either the Enterprise or Partner WSDL, or to return the session ID.
+
+$CurrentPage:
+-------------
+A global merge field type to use when referencing the current Visualforce page or page request.
+pass id in url.
+
+$Organization:
+--------------
+A global merge field type to use when referencing information about your company profile.
+Use organization merge fields to reference your organization's city, fax, ID, or other details.
+
+$ObjectType:
+------------
+A global merge field type to use when referencing standard or custom objects ( such as Accounts, Case or Opportunities) and the values of their fields.
+
+$Profile:
+--------
+A global merge field type to use when referencing information about the current user's profile. Use profile merge fields to reference
+information about the user's profile such as license type or name.
+
+<apex:page standardController="Account">
+    <apex:outputLink value="{!URLFOR($Action.Account.New)}">
+        Create New Account
+    </apex:outputLink>
+    <br/><br/>
+    Session_ID::: {!$Api.Session_ID}:
+<br/><br/>
+<apex:pageBlock title="Hello {!$User.FirstName}!">
+You belong to the {!account.name}.
+You are also a nice person.
+</apex:pageBlock>
+<apex:detail subject="{!account}" relatedList="false"/>
+<apex:relatedList list="OpenActivities" subject="{!$CurrentPage.parameters.relatedId}"/>
+<br/><br/>
+<br/><br/>
+{!$Organization.Id}<br/><br/>
+{!$Organization.Name}<br/><br/>
+{!$Organization.Division}<br/><br/>
+{!$Organization.Street}<br/><br/>
+{!$Organization.City}<br/><br/>
+{!$Organization.State}<br/><br/>
+{!$Organization.PostalCode}<br/><br/>
+{!$Organization.Fax}<br/><br/>
+{!$Organization.Phone}<br/><br/>
+{!$Organization.City}<br/><br/>
+{!$ObjectType.Account.fields.Accountnumber.Label}
+<br/><br/>
+{!$Profile.Id}
+{!$Profile.Name}
+<br/><br/>
+</apex:page>
+

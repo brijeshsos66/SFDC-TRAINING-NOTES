@@ -1,0 +1,265 @@
+Apex_Based_Sharing Rules:
+--------------------------
+1. Every object has corresponding share object where all the sharing defined on the object are stored.
+2. Object Name				Share Object
+   Account					AccountShare
+   Contact					ContactShare
+   Opportunity				OpportunityShare
+   Customer__c				Customer__Share
+   Transaction__c			Transaction__Share
+   Loan__c					Loan_Share
+
+3. When we want to share any record we need to understand following points
+	a. Which record you want to share.
+	b. With whom you want to share.
+	c. How you want to share.
+	d. Why you want to share.
+
+4. Sharing Rules on Standard Object.
+
+	Object Name				RecordId				With Whom				How
+	-------------------------------------------------------------------------------------------
+	Account					AccountId				UserOrGroupId			AccountAccessLevel
+	Contact					ContactId				UserOrGroupId			ContactAccessLevel
+	Opportunity				OpportunityId			UserOrGroupId			OpportunityAccessLevel
+	
+5. Sharing rules on standard object
+	
+	Object Name				RecordId				With Whom				How
+	--------------------------------------------------------------------------------------------
+	Customer__c				ParentId				UserOrGroupId			AccessLevel
+	Loan__c					ParentId				UserOrGroupId			AccessLevel
+
+	Example 1:
+	a. Write a query to get the opportunity whose name is testing and share the records with wilson.
+	
+		User u = [ select id from User where alias='wil'];
+		Opportunity op = [ select id, name from Opportunity where name='Testing' LIMIT 1];
+		
+		OpportunityShare share = new OpportunityShare();
+		share.opportunityId = op.Id; // Id of the record which you want to share
+		share.UserOrGroupId = u.Id;	 // Id of the user with whom you want to share
+		share.RowCause = 'Manual';	 // Reason for share
+		share.OpportunityAccessLevel = 'Read';	// Type of access
+		insert share;
+		
+	b. Write a query to fetch the customer whose phone is 988444 and share with wilson.
+		
+		Customer__c customer = [ select id from Customer__c where phone='988444'];
+		User u = [ select id from User where alias='wil'];
+		
+		Customer__Share share = new Customer__Share();
+		share.ParentId = customer.Id;
+		share.UserOrGroupId = u.Id;
+		share.AccessLevel = 'Read';
+		share.RowCause = 'Manual';
+		insert share;
+	
+Approval:
+---------
+1. It is a namespace.
+2. This namespace contains all the classes and method required for apex based approval process.
+3. It has some of the pre-defined apex classes.
+	a. ProcessRequest
+	b. ProcessResult
+	c. ProcessSubmitRequest
+	d. ProcessWorkItemRequest
+	e. UnlockResult
+4. ProcessRequest:
+	a. This is the parent class for ProcessSubmitRequest and ProcessWorkItemRequest.
+	b. This class contains the methods for Approval prcoess.
+		1. setNextApproverIds (List of Ids)
+			a. This method will set the list of Approver Ids to whom the record should be submitted for approval.
+		
+		2. setComments(string):
+			a. This will set the comments for the approval process.
+		
+		3. getComments():
+			a. This will return the comments for the approval process.
+		
+		4. getNextApproverIds():
+			a. This will return the list of ApproverId's to whom the record should be submitted.
+	
+5. ProcessSubmitRequest:
+	a. This is the pre-defined apex class.
+	b. This contains the method required for the submitting the record for approval prcoess.
+		1. setObjectId(id):	
+			a. This method will set the id of the recird which you want to submit for approval.
+		
+		2. getObjectId():
+			a. This will return id of the record which you have submitted for approval.
+		
+		3. setSubmitterId(id):
+			a. This method will set the id of the user submits the record for approval.
+		
+		4. getSubmiiterId():
+			a. This method will return the id of the use who submitted the record for approval.
+		
+		5. setProcessDefintionNameOrId(nameOrId):
+			a. This method will set name of the process or the id of the process to which record should be submitted.
+		
+		6. getProcessDefinitionNameOrId(nameOrId):
+			a. This method will get the name of the process or Id of the process to which record is submitted.
+		
+		7. getSkipEntryCriteria(skipEntryCriteria):
+			a. It is a boolean value.
+			b. When set as true, it will skip the entry condition and submit the record for approval step.
+		
+	Example:
+		Approval.ProcessSubmitRequest req1 = new Approval.ProcessSubmitRequest();
+		req1.setComments('Submitting request for approval.');
+		req1.setNextApproverId(a.id);
+		req1.setSubmitterId(user1.Id);
+		//Submit the record to specific process and skip the criteria evaluation.
+		req1.setProcessDefintionNameOrId('PTO_Request_Process');
+		req1.setSkipEntryCriteria(true);
+		//Submit the approval request for the account
+		Approval.ProcessResult result = Approval.process(req1);
+		
+
+public class Action_Example_1 {
+	public String accName { set; get; }
+	public String place { set; get; }
+	public String result { set; get; }
+	public void show(){
+		result='Name :'+accName+': Place: '+place;
+	}
+}
+
+<apex:page controller="Action_Example_1">
+	<apex:form>
+		<apex:pageBlock title="Action_Support">
+			Enter Name: <apex:inputText value="{!accname}">
+            <apex:actionSupport event="onchange" action ="{!show}" reRender="one"/>
+			</apex:inputText><br/><br/>
+			Enter place: <apex:inputText value="{!place}">
+            <apex:actionSupport event="onchange" action ="{!show}" reRender="one"/>
+			</apex:inputText><br/><br/>
+			<apex:outputLabel value="{!result}" id="one" />
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+
+=========================================================================
+public class Action_Pooler_Example{
+	public String result { set; get; }
+	public Integer count { set; get; }
+	public Action_Pooler_Example(){
+		count = 0;
+		result='Time :'+system.now()+' Count: '+count;
+	}
+	public void show(){
+		count = count+1;
+		result = 'Time :'+system.now()+' Count: '+count;
+	}
+}
+----------------------------
+<apex:page controller="Action_Pooler_Example">
+	<apex:form>
+		<apex:actionPoller action="{!show}" interval="5" reRender="one" status="mystat" />
+		<apex:outputLabel value="{!result}" id="one" />
+		<apex:actionStatus id="mystat" startText="Loading..." />
+	</apex:form>
+</apex:page>
+======================================================================
+public class Action_Example_1 {
+	public String accName { set; get; }
+	public String place { set; get; }
+	public String result { set; get; }
+	public void show(){
+		result='Name :'+accName+': Place: '+place;
+	}
+}
+-------------------------------
+<apex:page controller="Action_Example_1" id="page">
+	<script>	
+		function call(){
+			var name = document.getElementById('page:fm:pb:name').value;
+			var place = document.getElementById('page:fm:pb:place').value;
+			if(name!='' && place != ''){
+				fun(name,place);
+			} else {	
+				alert('Enter name and place values');
+			}
+		}
+	</script>
+	<apex:form id="fm">
+		<apex:actionFunction name="fun" action="{!show}" reRender="one" >
+			<apex:param name="accName" assignTo="{!accName}" value="" />
+			<apex:param name="place" assignTo="{!place}" value=""/>
+		</apex:actionFunction>
+		<apex:pageBlock title="Action_Support" id="pb">
+			Enter Name: <apex:inputText onchange="call()" id="name" /><br/><br/>
+			Enter Place: <apex:inputText onchange="call()" id="place" /><br/><br/>
+			<apex:outputLabel value="{!result}" id="one" />
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+
+========================================================
+Similiarities:
+
+Both action support and function can be used to call a controller method using an AJAX request.
+
+Difference:
+1. Action function can call the controller method from Javascript.
+2. Action support adds AJAX support to another visualforce component and then call the controller method.
+
+WHat they do and their similiarities:
+1. Both action support and action function can be used to call a controller method using an AJAX request.
+	a. For example call controller onclick of a inputcheck box.
+	b. call a controller method on focus of a input field.
+
+2. Action function cannot add AJAX support to another component.
+But from a particular component which has AJAX support (onclick, inblur, etc) action function can be called to call
+the controller method.
+
+
+RemoteAction:
+-------------
+a. If you define any method as remote action, this method can be invoked directly in the Javascript.
+b. To define the method as remote action, we have to use @RemoteAction annotation.
+c. Method should be static.
+d. Method can have return type and parameters.
+
+	If you want to invoke the remote action in the Javascript
+	ClassName.methodName(parameters, function(result,event){});
+	event : This will specify the status of the event.
+	result : This will contain the result returned by the remote action method.
+	
+	global class Remote_Example{
+	@RemoteAction
+		global static String callMe(String name, String phone){
+			String result;
+			try{
+				Account acc = new Account();
+				acc.Name = name;
+				acc.Phone = phone;
+				insert acc;
+				result = 'Record Inserted Successfully:'+acc.Id;
+			} catch(Exception e){
+				result = 'Record insertion Failed:'+e.getMessage();
+			}
+		return result;
+		}
+	}
+------------------------------------
+<apex:page controller="Remote_Example" id="page">
+	<script>
+		function show(){
+			Remote_Example.callMe('Wipro','9998848583',function(result,event){
+						if(event.status){
+							document.getElementById('page:fm:res').innerHTML = result;
+						} else {
+							alert('Operation failed');
+						}
+					});
+				}
+	</script>
+	
+	<apex:form id="fm">
+		<apex:commandButton value="Submit" oncomplete="show()" />
+		<apex:outputLabel id="res" />
+	</apex:form>
+</apex:page>
+

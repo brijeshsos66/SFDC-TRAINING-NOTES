@@ -1,0 +1,366 @@
+ListView:
+-------------
+1. If you want to display list of records in the VF page then we use list view.
+2. There are four ways in which we can display the records:
+	a. PageBlockTable
+	b. DataTable
+	c. DataList
+	d. Repeat
+	
+	PageBlockTable:
+	----------------
+	1. This is child component of pageBlock.
+	2. This is used to display list of records.
+	3. Maximum it can display 1000 records.
+	4. Attributes:
+		a. value : This will reffer to list of records.
+		b. var : It is a variable, it will refer one record at a time from the list of the record given
+				 given as value.
+		c. first : This is a numberical value.
+				   This will specify from which index records should be displayed.
+		d. rows : This is a numberical value.
+				  This will specify how many records should be displayed.
+	
+	<apex:page standardController="Lead" recordSetVar="items">
+		<apex:form>
+			<apex:pageBlock title="Lead Records">
+			<apex:pageTable value="{!items}" var="a">
+				<apex:column>
+					<apex:facet name="header"><apex:inputcheckbox /> </apex:facet>
+					<apex:inputcheckbox />
+				</apex:column>
+				<apex:column value="{!a.lastName}" />
+				<apex:column value="{!a.firstName}" />
+				<apex:column value="{!a.phone}" />
+				<apex:column headerValue="Company">{!a.company}</apex:column>
+				
+				<!-- headerValue : If you want to define custom headerValue then we use the attribute headerValue.
+								   It will take only string value
+				-->
+				
+				<apex:column headerValue="Action">
+					<apex:commandButton value="add" />
+					<apex:commandButton value="del" />
+				</apex:column>
+				<apex:column headerValue="view">
+					
+					<!-- &nbsp : This will create one character space -->
+					
+					<apex:commandLink value="Edit" />&nbsp;|&nbsp;
+					<apex:commandLink value="New" />
+				</apex:column>
+			</apex:pageBlockTable>
+		</apex:pageBlock>
+		<apex:pageBlock title="DataTable">
+			<apex:dataTable value="{!items}" first="5" rows="7" width="600" bgcolor="yellow" frame="boder" rules="cols" cellpaddding="10" cellspacing="10">
+				<apex:column value="{!z.lastName}" headerValue="LastName" />
+				<apex:column value="{!z.firstName}" headerValue="FirstName" />
+				<apex:column value="{!z.phone}" headerValue="Phone" />
+			</apex:dataTable>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+
+(ii)
+<apex:page>
+	<apex:form>
+		InputTest :<apex:inputText /> <br/><br/>
+		InputPassword :<apex:inputSecret /> <br/><br/>
+		InputHidden: <apex:inputHidden /> <br/><br/>
+		InputTextArea: <apex:inputTextArea rows="3" cols="10" /> <br/><br/>
+		Inputchecknox: <apex:inputcheckbox /> <br/><br/>
+	</apex:form>
+</apex:page>
+
+public class Input_Example_2 {
+	public String lastName { set; get; }
+	public String firstName { set; get; }
+	public String city { set; get; }
+	public String pancard { set; get; }
+	public String address1 { set; get; }
+	public String address2 { set; get; }
+	public String[] course { set; get; }
+	public Input_Example_2() {
+		course = new String[4];
+	}
+}
+
+-----------------------------------------
+<apex:page controller = "Input_Example_2">
+	<apex:sectionHeader title="Employee" subtitle="New Employee" help="/apex/page" />
+	<apex:form>
+		<apex:pageBlock title="Employee">
+			<apex:pageBlockButtons location="top">
+				<apex:commandButton value="Save" />
+				<apex:commandButton value="Cancel" />
+			</apex:pageBlockButtons>
+			
+			<apex:pageBlockSection title="Basic Information" collapsible="false">
+				<apex:pageBlockSectionItem>
+					<apex:outputLabel value="LastName" />
+					<apex:inputText value="{!lastName}" />
+				</apex:pageBlockSectionItem>
+				
+				<apex:pageBlockSectionItem>
+					<apex:outputLabel value="Pancard" />
+					<apex:inputSecret value="{!pancard}" />
+				</apex:pageBlockSectionItem>
+				
+				<apex:pageBlockSectionItem>
+					<apex:outputLabel value="FirstName" />
+					<apex:inputText value="{!firstName}" />
+				</apex:pageBlockSectionItem>
+				
+				<apex:pageBlockSectionItem>
+					<apex:outputLabel value="Technology" />
+					<apex:selectCheckboxes value="{!course}">
+						<apex:selectOption itemLabel="Admin" itemValue="Admin" /> <br/><br/>
+						<apex:selectOption itemLabel="Development" itemValue="Development" />
+					</apex:selectCheckboxes>
+				</apex:pageBlockSectionItem>
+				
+				<apex:pageBlockSectionItem>
+					<apex:outputLabel value="City" />
+					<apex:selectList size="1" value="{!city}">
+						<apex:selectOption itemLabel="Hyd" itemValue="Hyd" />
+						<apex:selectOption itemLabel="Ban" itemValue="Ban" />
+					</apex:selectList>
+				</apex:pageBlockSectionItem>
+				
+				<apex:pageBlockSectionItem>
+					<apex:outputLabel value="Gender" />
+					<apex:selectRadio value="{!gender}">
+						<apex:selectOption itemLabel="Male" itemValue="Male" /> <br/><br/>
+						<apex:selectOption itemLabel="Female" itemValue="Female" />
+					</apex:selectRadio>
+				</apex:pageBlockSectionItem>
+			
+			</apex:pageBlockSection>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+
+
+(iv)
+<apex:page standardController="Account">
+	<apex:form>
+		<apex:pageBlock title="InputField">
+			
+			<apex:pageBlockSection title="InputField">
+				<apex:inputField value="{!Account.Name}" />
+				<apex:inputField value="{!Account.Phone}" />
+				<apex:inputField value="{!Account.Industry}" />
+				<apex:inputField value="{!Account.Rating}" />
+			</apex:pageBlockSection>
+			
+			<apex:pageBlockSection title="InputText">
+				<apex:inputText value="{!Account.Name}" />
+				<apex:inputText value="{!Account.Phone}" />
+				<apex:inputText value="{!Account.Industry}" />
+				<apex:inputText value="{!Account.Rating}" />
+			</apex:pageBlockSection>
+			
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+
+(v)
+public class PickList_Example {
+	public String selected { set; get; }
+	public String[] myValues { set; get; }
+	public String[] course { set; get; }
+	public String gender { set; get; }
+	public PickList_Example(){
+		myValues = new String[4];
+		course = new String[4];
+	}
+}
+
+-----------------------------------------------------
+<apex:page controller = "PickList_Example">
+	<apex:form>
+		<apex:pageBlock title="PickList" id="one">
+			<apex:pageBlockButtons locations="top" dir="RTL">
+				<apex:commandButton value="Submit" reRender="one" />
+			</apex:pageBlockButtons>
+			
+			<apex:pageBlockSection title="PickList">
+			City: <apex:selectList size="1" value="{!selected}">
+						<apex:selectOption itemLabel="-None-" itemValue="none" />
+						<apex:selectOption itemLabel="Hyd" itemValue="TG" />
+						<apex:selectOption itemLabel="Ban" itemValue="KA" />
+						<apex:selectOption itemLabel="Che" itemValue="TN" />
+						<apex:selectOption itemLabel="Pune" itemValue="MH" />
+					</apex:selectList>
+				</apex:pageBlockSection>
+			
+			<apex:pageBlockSection title="PickList-MultiSelect">
+			City: <apex:selectList multiSelect="true" value="{!myvalues}">
+						<apex:selectOption itemLabel="-None-" itemValue="none" />
+						<apex:selectOption itemLabel="Hyd" itemValue="TG" />
+						<apex:selectOption itemLabel="Ban" itemValue="KA" />
+						<apex:selectOption itemLabel="Che" itemValue="TN" />
+						<apex:selectOption itemLabel="Pune" itemValue="MH" />
+					</apex:selectList>
+				</apex:pageBlockSection>
+			
+			<apex:pageBlockSection title="Radio">
+				Gender: <apex:selectRadio value="{!gender}">
+							<apex:selectOption itemLabel="Male" itemValue="Male" />
+							<apex:selectOption itemLabel="Female" itemValue="Female" />
+						</apex:selectRadio>
+			</apex:pageBlockSection>
+			
+			<apex:pageBlockSection title="Checkboxes">
+				City: <apex:selectCheckboxes value="{!course}">
+						<apex:selectOption itemLabel="Java" itemValue="Java" />
+						<apex:selectOption itemLabel="DotNet" itemValue="DotNet" />
+						<apex:selectOption itemLabel="PEGA" itemValue="PEGA" />
+						<apex:selectOption itemLabel="Oracle" itemValue="Oracle" />
+					</apex:selectList>
+				</apex:pageBlockSection>
+				
+			<apex:pageBlockSection>
+				PickList : {!selected} <br/><br/>
+				Multi-Select : {!myValues} <br/><br/>
+				Gener : {!gender} <br/><br/>
+				Course : {!course}
+			</apex:pageBlockSection>
+		</apex:pageBlock>
+	</apex:form>
+	</apex:page>
+	
+	(vi)
+	<apex:page>
+		<apex:form>
+			InputText: <apex:inputText /><br/><br/>
+			Max Length: <apex:inputText maxlength="5" tabindex="2" /> <br/><br/>
+			Max Size: <apex:inputText size="5" /> <br/><br/>
+			Disable: <apex:inputText disabled="true" /> <br/><br/>
+			Direction: <apex:inputText dir="RTL" /> <br/><br/>
+			Rendered: <apex:inputText rendered="false" /> <br/><br/>
+			Required: <apex:inputText required="true" /> <br/><br/>
+			
+			<!-- value: <apex:inputText value="{!}" /> -->
+			 TabIndex : <apex:inputText tabindex="1" />
+		</apex:form>
+	</apex:page>
+	
+	(vii)
+	
+	<apex:page standardController="Contact">
+		<apex:sectionHeader title="Contact" subtitle="New Contact" help="/apex/StandardController_Notes" />
+		<apex:form>
+			<apex:pageBlock title="Contact">
+			
+			<apex:pageBlockButtons locations="top">
+			<apex:commandButton value="Save" />
+			<apex:commandButton value="Cancel" />
+			</apex:pageBlockButtons>
+			
+			<apex:inlineEditSupport>
+			<apex:pageBlockSection title="Basic Info" collapsible="false" columns="1">
+				<apex:outputField value="{!Contact.LastName}" />
+				<apex:outputField value="{!Contact.Email}" />
+				<apex:outputField value="{!Contact.FirstName}" />
+				<apex:outputField value="{!Contact.MobilePhone}" />
+				<apex:outputField value="{!Contact.Phone}" />
+				<apex:outputField value="{!Contact.OwnerId}" />
+			</apex:pageBlockSection>
+			</apex:inlineEditSupport>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+
+(viii)
+Message:
+---------
+1. Message is an predefined Apex class.
+2. It is defined under the namespace of Apexpages.
+3. This class is used to generate the message
+4. Possible types of Messages:
+	a. CONFIRM
+	b. ERROR
+	c. WARNING
+	d. FATAL
+	e. INFO
+5. Syntax:
+	Apexpages.Message(ApexPages.severity, message)
+	
+	Example:
+	
+	Apexpages.Message msg1 = new Apexpages.Message(Apexpages.Severity.Error,'This is error');
+	Apexpages.Message msg2 = new Apexpages.Message(Apexpages.Severity.CONFIRM,'This is success message');
+	
+System.Apexpages:
+------------------
+1. Apexpages is a pre-defined apex class.
+2. It is defined under system namespace.
+3. This class will add the message to the current page context.
+	
+	a. addMessage(msg): This will add the message to the page.
+	
+		Apexpages.Message msg = new Apexpages.Severity.CONFIRM,'Record Loaded');
+		Apexpages.addMessage(msg);
+		
+
+--------
+EX1:
+
+	public class Apex_Message_Example{
+		
+		public Apex_Message_Example(){
+			Apexpages.Message msg1 = new ApexPages.Message(Apexpages.Severity.CONFIRM,'Sucessfully India');
+			Apexpages.Message msg2 = new Apexpages.Message(Apexpages.Severity.Error,'Error Message');
+			Apexpages.Message msg3 = new Apexpages.Message(ApexPages.Severity.WARNING,'Warning Message');
+			Apexpages.Message msg4 = new Apexpages.Message(Apexpages.Severity.INFO,'Info Message');
+			Apexpages.addMessage(msg1);
+			Apexpages.addMessage(msg2);
+			Apexpages.addMessage(msg3);
+			Apexpages.addMessage(msg4);
+			}
+		}
+
+------------------------
+<apex:page controller="Apex_Message_Example">
+	<apex:pageMessages />
+</apex:page>
+----------------------------------------------------------
+EX2-
+
+public class Apex_Message_Example_2{
+	public String name { set; get; }
+	public Integer age { set; get; }
+	public void Submit(){
+		if(name == ''){
+			Apexpages.Message msg = new Apexpages.Message(Apexpages.Severity.Error,'Name connot be blank');
+			Apexpages.addMessage(msg);
+		}
+		if(age < 30){
+			Apexpages.Message msg = new Apexpages.Message(Apexpages.Severity.WARNING,'Age cannot be less than 30');
+			Apexpages.addMessage(msg);
+		}
+	}
+}
+
+--------------------------------------------
+<apex:page controller="Apex_Message_Example_2">
+	<apex:form id="fm">
+		<apex:pageMessages />
+		<apex:pageBlock title="Message">
+			<apex:pageBlockButtons location="top">
+				<apex:commandButton value="Submit" action="{!submit}" reRender="fm" />
+			</apex:pageBlockButtons>
+			<apex:pageBlockSection columns="1">
+				<apex:pageBlockSectionItem>
+					<apex:outputLabel value="Name" />
+					<apex:inputText value="{!name}" />
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem>
+					<apex:outputLabel value="Age" />
+					<apex:inputText value="{!age}" />
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

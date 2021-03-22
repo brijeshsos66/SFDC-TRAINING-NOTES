@@ -1,0 +1,301 @@
+<!--
+SatndardController Actions:
+1. Salesforce has defined some standard actions on every object.
+	a. Save
+	b. QuickSave
+	c. Edit
+	d. List
+	e. View
+	f. Cancel
+-->
+
+<apex:page standardController="Account">
+	<apex:form>
+		<apex:pageBlock title="Account">
+			
+			<apex:pageBlockButtons location="top">
+				<apex:commandButtons value="Save" action="{!save}" />
+				<apex:commandButtons value="Cancel" action="{!cancel}" />
+			</apex:pageBlockButtons>
+			
+			<apex:pageBlockSection title="Basic contact info" columns="1" collapsible="true">
+				<apex:inputField value="{!Account.Name}" />
+				<apex:inputField value="{!Account.Phone}" />
+			</apex:pageBlockSection>
+			
+			<apex:pageBlockSection title="Basic Info" columns="2" collapsible="true">
+				<apex:inputField value="{!Account.Industry}" />
+				<apex:inputField value="{!Account.Rating}" />
+			</apex:pageBlockSection>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+
+Apex:facet:
+----------
+1. This component is used to create header, footer or caption for a block.
+2. Attributes:
+	name:
+	a. This will specify the location where we want to display the content of facet.
+	b. Possible values are header, footer, caption.
+3. If you want to create header with a text value we can use title.
+4. If you want to display any other than text as header or footer we use apex:facet
+
+<apex:page>
+	<apex:form>
+		<apex:pageBlock>
+			<apex:facet name="header">
+				<apex:commandButton value="Submit" />
+			</apex:facet>
+				This is block.
+			<apex:facet name="footer">
+				<h1>CopyRight @ Salesforce </h1>
+			</apex:facet>
+			<apex:facet name="caption">
+				<h1> This is a example </h1>
+			</apex:facet>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+
+---------------------------------------------------------------------------
+
+<apex:page>
+	<apex:sectionHeader title="Student" subtitle="New Student" help="/apex/Apex_Facet_Notes" />
+	<apex:pageBlock>
+		<apex:facet name="header">Header Info</apex:facet>
+		<apex:facet name="footer">Footer Info</apex:facet>
+		Name : Kiran <br/><br/>
+		City : Bangalore <br/><br/>
+		Place : SRNagar
+	</apex:pageBlock>
+</apex:page>
+
+---------------------------------------------------------------------
+recordSetVar
+pageBlockTable
+value="{!items}"
+var="a"
+columns
+commandLink
+
+<apex:page standardController="Account" recordSetVar = "items">
+	<apex:form>
+		<apex:pageBlock mode="maindetail" >
+			<apex:pageBlockTable value="{!items}" var="a">
+				<apex:column>
+					<apex:facet name="header">
+						<apex:inputCheckBox />
+					</apex:facet>
+					<apex:inputCheckBox />
+				</apex:column>
+				<apex:column value="{!a.name}" />
+				<apex:column value="{!a.industry}" />
+				<apex:column value="{!a.phone}" />
+				<apex:column value="{!a.rating}" />
+				<apex:Column headerValue="Action">
+					<apex:commandButton value="Edit" />
+					<apex:commandButton value="Del" />
+				</apex:Column>
+				<apex:column headerValue="view">
+					<apex:commandLink value="Pdf" /> &nbsp;!&nbsp;
+					<apex:commandLink value="Doc" />
+				</apex:column>
+			</apex:pageBlockTable>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+
+---------------------------------------------------------------------------
+StandardController:
+------------------
+1. If you want to refer to any one of the properties of an object, then that objects should be defined as standardController.
+2. We can define only one object as standardController.
+3. It can be standard object or custom object.
+	Example:
+	StandardController = "Account"
+	StandardController="Customer__c"
+4. If you want to refer to the fields of an object.
+	{!ObjectName.Fieldname}
+	Object 			Field			Expression		
+	Standard		Standard		{!ObjectName.FieldName}			{!Account.Name}
+	Standard		Custom 			{!ObjectName.FieldName__C}		{!Account.Active__C}
+	Custom			Standard		{!ObjectName__c.FieldName}		{!Loan__c.Name}
+	Custom			Custom			{!ObjectName__c.FieldName__C}	{!Loan__c.Type__c}
+	
+InputFields:
+-------------
+1. This will create inputText box.
+2. This will refer to exact properties of a given field.
+3. If you want to refer to a lookup/masterdetails field
+	Object			Lookup/Master Field			Expression			
+	Standard		Standard		{!ObjectName.FieldName}			Example: Account.OwnerId
+	Standard		Custom 			{!ObjectName.FieldName__C}		Example: Account.Manager__c
+	Custom			Standard		{!ObjectName__c.FieldName}		Example: Customer__c.OwnerId
+	Custom			Custom			{!ObjectName__c.FieldName__C}	Example: Customer__C.Manager__c
+
+<apex:page standardController="Account">
+	<apex:form>
+		<apex:pageBlock title="Account" helpTitle="needHelp?" helpUrl="/apex/page">
+			<apex:pageBlockSection title="Basic Info" collapsible="false">
+				<apex:inputField value="{!Account.Name}" />
+				<apex:inputField value="{!Account.Phone}" />
+				<apex:inputField value="{!Account.Rating}" />
+				<apex:inputField value="{!Account.Industry}" />
+				<apex:inputField value="{!Account.Ownership}" />
+				<apex:inputField value="{!Account.AnnualRevenue}" />
+			</apex:pageBlockSection>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+
+---------------------------------------------------------------------
+<apex:page standardController="Account" recordSetVar="items">
+	<apex:form>
+		<apex:repeat value="{!items}" var="a">
+			{!a.name} -> {!a.phone}
+		</apex:repeat>
+		
+		<br/><br/>
+		<div style="width:600px;border:1px solid black; padding:10px; ">
+			<table width="100%">
+				<tr width="100%" style="background:grey; padding:10px; ">
+					<td>Name </td>
+					<td>Phone </td>
+					<td>Industry </td>
+				</tr>
+				<apex:repeat value="{!items}" var="a" >
+					<tr width="100%">
+						<td>{!a.name}</td>
+						<td>{!a.phone}</td>
+						<td>{!a.industry}</td>
+					</tr>
+				</apex:repeat>
+			</table>
+		</div>
+	</apex:form>
+</apex:page>
+---------------------------------------------------------------------
+DataTable:
+-----------
+1. This component is used to display list of records.
+2. List of records are displayed cloumn wise.
+3. This will not inherit the standard look and feel of salesforce.
+4. Attributes:
+	value : This will contain list of records which you want to display.
+	var   : This is a varable/cursor referring to one by one record from the list.
+	
+	<!--
+		border : Thsi will border for the database (rows,cols,vsides,hsides)
+		width  : This will specidy width od the table in px
+	-->
+
+<apex:page standardController="Account" recordSetVar="myData">
+	<apex:form>
+		<apex:dataTable value="{!myData}" var="a" width="500" cellpadding="10" cellspacing="10" border="1" style="margin-left:5">
+			<apex:column value="{!a.name}" />
+			<apex:column value="{!a.industry}" />
+			<apex:column value="{!a.phone}" />
+		</apex:dataTable>
+	</apex:form>
+</apex:page>
+
+Conroller:
+---------
+1. If you want to refer to any apex class in the VF page, then define that aoex class Controller.
+2. We can define only one apex class as Controller.
+3. If we want to access any apex class on the VF page that class should be public or global.
+4. Apex class should contain constructur with no parameters or dummy constructor.
+5. If you want to refer to any varaible in the apex class then varibale should be public or global.
+6. Variable should have setter and getter methods.
+7. Setter method:
+	1. This will take the value from the VF page component and save it in the apex class varaible.
+	public void setName(String name){
+		this.name = name;
+	}
+	
+8. Getter method:
+	1. This will take the value fROm the apex class and return to the VF page.
+	public Integer getName(){
+		return name;
+	}
+9. Order of Execution of VF page:
+	a. First Constructor will be invoked.
+	b. Invoke the action defined in apex:page.
+	c. Getter method
+(i)
+public class Apex_Example_1{
+	public Integer age { set; get; }
+	public String name { set; get; }
+	public String branch { set; get; }
+	
+	public Apex_Example_1(){
+		age = 90;
+		name = 'Sam';
+	}
+}
+
+----------------------------------------------
+<apex:page controller="Apex_Example_1">
+	Name : {!name} <br/>
+	Age  : {!age} <br/>
+	Branch : {!branch}  
+</apex:page>
+
+-----------------------------------------------------------------------------
+(ii)
+public class Apex_Example_2{
+	public Integer aval,bval, cval;
+	public String result{ set; get; }
+	public Apex_Example_2() {
+		aval = 10;
+		bval = 50;
+	}
+	public void add(){
+		cval = aval + bval;
+		result='Sum of Aval and Bval is: '+cval;
+	}
+	public void mul(){
+		cval = aval * bval;
+		result = 'Mul of Aval and Bval is:'+cval;
+	}
+}
+
+--------------------------------------------------------------------------
+<apex:page controller ="Apex_Example_2" action="{!add}">
+	<apex:form id="fm">
+		<apex:commandButton value="Submit" action="{!mul}" reRender="fm"/>
+	{!result}
+	</apex:form>
+</apex:page>
+
+--------------------------------------------------------------------------
+(iii) 
+public class Calculator{
+	public Decimal amount { set; get; }
+	public Decimal year   { set; get; }
+	public Decimal rate   { set; get; }
+	public Decimal interest{set; get; }
+	public Calculator(){
+		amount=50000;
+		rate=10;
+		year=1;
+	}
+	public void oneYear(){
+		interest = (amount*year*rate)/100;
+	}
+	public void twoYear(){
+		year = 2;
+		interest = (amount*year*rate)/100;
+	}
+}
+-------------------------------------------
+<apex:page controller="Calculator" action="{!oneYear}">
+	<apex:form id="fm">
+		<apex:commandButton value="Two" action="{!twoYear}" reRender="fm" />
+		{!interest}
+	</apex:form>
+</apex:page>
+
+
+	

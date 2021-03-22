@@ -1,0 +1,409 @@
+Delete Triggers:
+----------------
+1. These triggers are fired when we are trying to delete the records from sobject.
+2. Before Delete:
+	a. These triggers are fired before the records are deleted from the sobject.
+	b. Trigger.old:
+		1. This will contain the list of records which we are trying to delete.
+		2. It is a list of records.
+	c. Trigger.oldMap:
+		1. This will contain the Map of records.
+		2. This will contain recordId as key and records as value.
+	
+	d. Trigger			Variables			Read		Write		SOQL		DML	
+	   --------------------------------------------------------------------------------
+	   Before Delete	Trigger.old			Yes			Yes			Yes			No
+						Trigger.oldMap		Yes			Yes			Yes			No
+						
+	   After Delete 	Trigger.old			Yes			No			No			No
+						Trigger.oldMap		Yes			No			No			No
+		-------------------------------------------------------------------------------
+	
+	Example 1:
+	1. Customer and Payment objects are connected by Lookup relation and Payment has enables donot
+		delete the parent the parent record, when it is a part of lookup relation.
+	2. When ever in-active customer is deleted, then corresponding payment records should be deleted.
+	-------------------------------------------------------------------------------------------------
+	
+		trigger Customer_Delete on Customer__c (before Delete){
+			
+			List<Id> customers = new List<Id>();
+			for(Customer__c c : Trigger.old){
+				if(c.Active__c == false){
+					customer.add(c.id);
+					}
+				}
+			List<Payment__c> payments = [ select id from Payment__c where Customer__c in : customers];
+			Database.delete(payments, false);
+		}
+	------------------------------------------------------------------------------------------------------
+	Example 2:
+	1. Whenever we are deleting account, check whether it has any opportunities which are open. if it has any open
+	opportunities then don't allow the deletion of account.
+	-------------------------------------------------------------------------------------------------
+		
+		trigger example on Account(before Delete){
+			
+			List<Account> accounts = [ select id, name, (select id, stageName from Opportunities where stagename != 'Closed Won'
+											and stagename!='Closed Lost') from Account where Id in : Trigger.old];
+			
+			for(Account a: accounts){
+				if(a.opportunities.size() > 0){
+					a.addError('Account cannot be deleted');
+					}
+				}
+			}
+		
+	After Undelete:
+	---------------
+	1. These triggers are fired after records are undeleted from the recycle bin.
+	2. Trigger.new:
+		a. This will contain list of new records which we are trying to undelete from the recycle bin.
+	3. Trigger.NewMap:
+		a. This will contain the map of new records which are undeleted from the recyclebin.
+	
+	Trigger			Variables			Read		Write		SOQL		DML
+	----------------------------------------------------------------------------------
+	After Undelete	Trigger.New			Yes			No			Yes			Yes
+	After Undelete	Trigger.NewMap		Yes			No			Yes			Yes
+	----------------------------------------------------------------------------------
+	
+Order of Execution of triggers
+---------------------------------
+	1. Loads the original record from the database or intializes the record for an upsert statement.
+	2. Fetch the new Version of data.
+	3. System Validation Rules will run
+		a. required field s are entered or not.
+		b. Datatype is matching or not..
+	4. Before Trigger
+	5. Custom Validation rule
+	6. Duplicate checks
+	7. Save records
+	8. After Triggers
+	9. Executes assignment rules.
+	10. Executes auto-response rules.
+	11. Executes workflow rules.
+		a. In case if there is any field update action in the workflow then it will call step 4 again.
+	12. Executes processes and flows launched via processes and flow trigger workflow actions.
+	13. Cross-object forulas, or update of parent record fields.
+	14. Executes escalation fields.
+	15. Executes Based sharing rules.
+	16. Criteria based sharing rules
+	17. Commit the record
+	18. Post commit operation like email.
+Order of Execution:
+https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_triggers_order_of_execution.htm
+
+Invoking Apex class with in trigger:
+-------------------------------------------
+	
+	Triggers:
+	--------
+		
+		trigger Opty_Trigger on Opportunity ( before insert, after insert, after update){
+			
+			if(Trigger.isBefore && Trigger.isInsert){
+				Opty_Trigger_Handler.beforeInsert1(Trigger.new);
+				Opty_Trigger_Handler.beforeInsert2(Trigger.new);
+			} else if(Trigger.isInsert && Trigger.isAfter){
+				Opty_Trigger_Handler.afterInsert(Trigger.new);
+			} else {
+				Opty_Trigger_Handler.afterUpdate(Trigger.oldMap, Trigger.newMap);
+				}
+			}
+		
+		public class Opty_Trigger_Handler{
+			public static void beforeInsert1(List<Opportunity> opty){
+				for(Opportunity op: opty){
+					op.StageName = 'Prospecting';
+					op.closeDate= System.today() + 15;
+					op.type='New Customer';
+				}
+			}
+			
+			public static void beforeInsert2(List<Opportunity> opty){
+				for(Opportunity op: opty){
+					op.StageName='Prospecting';
+					op.closeDate=System.today()+15;
+					op.type='New Customer';
+				}
+			}
+			
+			public static void afterInsert(List<Opportunity> opty){
+				User u = [ select id from User where alias='slive'];
+				List<OpportunityTeamMember> teams = new List<OpportunityTeamMember>();
+				for(Opportunity op: opty){
+					OpportunityTeamMember opt = new OpportunityTeamMember();
+					opt.OpportunityId = op.Id;
+					opt.OpportunityAccessLevel = 'Read';
+					opt.UserId = u.Id;
+					opt.TeamMemberRole = 'Account Manager';
+					teams.add(opt);
+				}
+				insert teams;
+			}
+		
+		public static void afterUpdate(Map<Id,Opportunity> oldMap, Map<Id,Opportunity> newMap){
+			User u = [ select id from User where alias='slive'];
+			List<OpportunityShare> share = new List<OpportunityShare>();
+			Set<Id> keys = oldMap.keySet();
+			for(Id k: keys){
+				Opportunity old = oldMap.get(k);
+				Opportunity newOpt = newMap.get(k);
+				if(old.stageName!='Closed Won' && newOpt.StageName=='Closed Won'){
+					OpportunityShare os = new OpportunityShare();
+					os.OpportunityId = k;
+					os.UserOrGroupId = u.Id;
+					os.OpportunityAccessLevel='Read';
+					os.RowCause='Manual';
+					share.add(os);
+					}
+				}
+			insert share;
+			}
+		}
+		
+	Example 2:
+	When ever new lead is created with rating as hot send email notification to registered email address with following body.
+	--------------------------------
+	Dear{!Lead.FirstName},
+	Thanks for showing interest on our products, our Agent will get back to you in 24 working hours.
+	
+	Thanks
+	Sales Team
+	--------------------------------
+	trigger example on Lead(after insert){
+		Example.callMe(Trigger.New);
+	}
+	
+	public class Example{
+		public static void callMe(List<Lead> leads){
+			
+			List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();
+			
+			for(Lead l: leads){
+				if(l.rating == 'Hot'){
+					Messaging.SingleEmailMessage msg = new Messaging.SingleEmailMessage();
+					String[] toadd = new String[]{l.email};
+					msg.setToAddress(toadd);
+					msg.setSubject('Test Email');
+					String body = 'Dear :'+l.firstName;
+					body=body+'<br/>Thanks for showing interest on or products<br/>';
+					body=body+'Thanks <br/> Sales Team';
+					msg.setHtmlBody(body);
+					emails.add(msg);
+					}
+				}
+			Messaging.sendEmail(emails);
+		}
+	}	
+Single Email Messaging:
+https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_email_outbound_single.htm
+
+
+(Q) WHENEVER a new Account is Created then set rating as Warm, Ownership as Private , type as prospect and Active as Yes.
+
+trigger Account_trigger on Account(before insert){
+				
+				for(Account a: Trigger.New){
+					a.Rating='Warm';
+					a.Ownership='Private';
+					a.Type='Prospect';
+					a.Active__c='Yes';
+					}
+				}
+
+	RECURSIVE TRIGGER:
+	------------------
+	public class Recursive_Example{
+		public static Boolean flag = true;
+		public static void call(){
+			if(flag == true){
+				flag = false;
+				Account acc = new Account();
+				acc.Name='Axis Bank';
+				acc.Phone='040-1234';
+				acc.Industry='Energy';
+				insert acc;
+				}
+			}
+		}
+	
+(Q)	What is Batch Apex?
+----------------------
+	Batch as the name suggests, is used when a large data(bulk) volume is involved and it has to be redundantly
+	processed using a particular logic.
+	
+	The Batch apex, can be used to conveniently perform time to time task and some 
+	real complex job ranging from data cleansing, archiving the data to the other quality
+	improvements.
+	
+(Q)	When to use Batch Apex?
+	------------------------
+	The typical use of batch apex is when you want to do a bulk job, but if you do it in a regular
+	apex you're bound to hit the governor limits. 
+	Batch classes process the set of records you pass to it in batches of maximum 200 per batch.
+
+(Q)	Advantages of using Batch Apex?
+	-------------------------------
+	Higher Governor Limits
+	Can be used to process in batches
+	Can be scheduled to run at different time.
+	Work around to other governor limits. e.g, Send More than 10 E-mails blog
+	
+	here is the governor limit difference in using batch.
+	
+	Area								Normal Context				Batch Context
+	SOQL queries						100 SOQL per cycle			200 SOQL per cycle
+	records retreived by SOQL queries	50,000						50,000,000 (getQueryLocator)
+	executed code statements			200,000						1,000,000 (Winter '14)
+	Heap Size							6 MB						12 MB
+	
+	A maximum of 50 million records can be returned in the Database.QueryLocator object.
+	The maximum number of batch executions is 250,000 per 24 hours.
+	
+	============================================================================================
+Batch Class:
+-----------
+	global class ExampleBatchClass implements Database.Batchable<sObject>{
+		
+		global ExampleBatchClass(){
+			//Batch Constructor
+		}
+		
+		//Start method
+		global Database.QueryLocator start(Database.BatchableContext BC){
+			return Database.getQueryLocator(query);
+		}
+		
+		//Execute Logic
+		global void execute(Database.BatchableContext BC, List<sObject> scope){
+			//Logic to be executed batch wise
+		}
+		
+		global void finish(Database.BatchableContext BC){
+			//Logic to be executed at finish
+		}
+	}
+=======================================================================================
+
+Call the Batch Class:
+
+ExampleBatchClass b = new ExampleBatchClass();
+//Parameters of ExecuteBatch(context, Batchsize)
+database.executebatch(b,25); //size 25
+Note: if batch size is not mentioned it is 200 by default.
+database.executebatch(b); // size 200
+
+===========================================================================================
+Scheduling Batch Process:
+--------------------------
+We can also schedule batch apex. In order to schedule batch class, we need to write schedulable batch class.
+
+Example:
+global class batchAccountUpdateScheduler implements Schedule{
+	global void execute(SchedulableContext sc){
+		ExampleBatchClass b = new ExampleBatchClass();
+		Database.executebatch(b);
+		}
+	}
+
+====================================================================================
+anonymous block:
+---------------
+
+batchAccountUpdateSchedular clsCRON = new batchAccountUpdateSchedular();
+System.Schedule('job', ' 0 0 23 1-31 1-12 ? *', clsCRON);
+or
+String jobId = System.schedule('Hourly Job', ' 0 0 * * * ?', new batchAccountUpdateSchedular());
+
+-------------------------------------------------
+
+CRON expression has the following syntax:
+
+0	 0	 5	 ?	 *	 1,2,3,4,5,6,7
+{1} {2} {3} {4} {5} {6}
+
+{1} Seconds - so 0 here i.e, start of the minute
+{2} Minutes - 0 again so start of the hour
+{3} Hours - 5 so 5 am, Uses 24 hour notation so 21 = 9pm
+{4} Day_of_Month - ? means no specific vlaue, only available for day of the month and day of the week.
+{5} Month - * indicates all values, i.e., every month. (if we only want to run on 1st Jan say, this would be 1)
+{6} Day_of_Week - 1,2,3,4,5,6,7 here specifies days 1,2,3,4,5,6,7 in the week.
+	We could also write this string as MON-FRI or preferably as * to indicate all values.
+
+===================================================================================
+global class batchAccountUpdate implements Database.Batchable<sObject>{
+	global Database.QueryLocator start(Database.BatchableContext BC){
+		String query = 'SELECT Id, Name FROM Account';
+		return Database.getQueryLocator(query);
+	}
+	
+	global void execute(Database.BatchableContext BC, List<Account> scope){
+		for(Account a: scope){
+			a.Name = a.Name+'Updated';
+			}
+		update scope;
+	}
+	
+	global void finish(Database.BatchableContext BC){
+		}
+	}
+--------------------------------------------------------------------------------
+global class MyJobSchedulable implements Schedulable{
+	
+	/* RUN at 8:30 am on the first of every month. Remember this is scheduled in the user's timezone
+	who schedules the job, not UTC */
+	
+	public static final String CRON_EXPR = '0 30 8 ? * * *';
+	/*
+	Call this from Anonymous Apex to schedule at the default regularity
+	*/
+	
+	global static String scheduleIt(){
+		MySchedulable job = new MyJobSchedulable();
+		return System.schedule('Something Descriptive', CRON_EXPR, job);
+		}
+	
+	global void execute(SchedulableContext sc){
+	//THis is good practice if you are likely to be processing a lot of records at a time
+	batchAccountUpdate b = new batchAccountUpdate();
+	Database.executebatch(b,2);
+	}
+}
+
+------------------------------------------------
+anonymous block:
+MyJobSchedulable.scheduleIt();
+
+====================================================================================
+
+global class Batch_Example_2 implements Database.Batchable<Sobject>, Database.Stateful,Database.AllowsCallouts{
+	global Integer count = 0;
+	global static Integer size = 0;
+	global Database.QueryLocator start(Database.BatchableContext bc){
+		String query='select id, name from Account';
+		return Database.getQueryLocator(query);
+	}
+	
+	global void execute(Database.BatchableContext bc, List<Account> scope){
+		for(Account a: scope){
+			count= count+1;
+			size = size+1;
+			}
+		}
+	
+	global void finish(Database.BatchableContext bc){
+		Account acc = new Account();
+		acc.Name ='Batch Call';
+		acc.Description='Count: '+count+ 'Size: ''+size;
+		insert acc;
+	}
+}
+
+----------------------------------------------------------------
+Batch_Example_2 be = new Batch_Example_2();
+Id jobId = Database.executebatch(be,5);
+=====================================================================	
+Blog On CronExpression:
+https://webkul.com/blog/cron-expression-for-scheduling-jobs-in-salesforce/

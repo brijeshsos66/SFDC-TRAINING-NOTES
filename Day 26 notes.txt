@@ -1,0 +1,53 @@
+		SOAP API												REST API
+1. Relies in SOAP protocol.								1. Relies on REST architecture using HTTP.
+2. Transports data in DML.								2. Transports data in JSON or XML.
+3. Highly structured/typed.								3. Less structured? Less bulky data.
+4. Handles large data loads.							4. Works well with JavaScript.
+5. Designed with large enterprise application in mind	5. Desgined with mobile devices in mind.
+
+			JSON												XML
+1. JavaScript Object Notation has a type like string,	1. Extensible markup language is type less, and should be string.
+number, object, Boolean.
+2. It is a way of representing objects.					2. It is a markup language and uses tag structure to represent data items.
+3. Retrieving value is easy.							3. Retrieving value is difficult.
+4. It does not provide any support for namespaces.		4. It supports namespaces.
+5. It is less secured.									5. It is more secure than JSON.
+
+API					Name				Protocol						Data Format Communication
+REST API			REST				JSON, XML						Synchronous
+SOAP API			SOAP (WSDL)			XML								Synchronous
+Chatter REST API	REST				JSON, XML						Synchronous(photos are processed asynchronously)
+Analytics REST API	REST				JSON, XML						Synchronous
+Bulk API			REST				CSV, JSON, XML					Its Asynchoronous. Handles large data loads with batching.
+Metadata API		SOAP (WSDL)			XML								Asynchoronous. Retrive, deploy, and modify metadata.
+Streaming API 		Bayeux				JSON							Asynchoronous. Push notifications from salesforce to subscribing applications.
+Apex SOAP API		SOAP (WSDL)			XML								Synchronous
+
+WSDL(Web Services Description Language) is an XML document that describes a web service. There are two types of WSDL in salesforce:
+	
+	Enterprise WSDL
+	Partner	WSDL
+	
+Enterprise 	WSDL								Partner WSDL
+Strongly typed									Loosely typed.
+Tied to a specific cofiguration of salesforce   Useful for any configuration of salesforce.
+Changes if custom field or custom objects are	Does not changes if custom field or custom objects
+added to your organization.						are added to an organization salesforce configuration.
+
+=========================================================================
+
+global with sharing class ContactResource{
+	webservice static List<Contact> getContactIdAndNames(Integer contactLimit){
+		List<Contact> contactList = [ SELECT Id, Name, Birthdate, Phone FROM Contact LIMIT : contactLimit];
+		return contactList;
+	}
+}
+
+global with sharing class CreateAcc{
+	webservice static id AccInsert(String inputName){
+		Account acc = new Account();
+		acc.name = inputName;
+		insert acc;
+		return acc.id;
+		}
+	}

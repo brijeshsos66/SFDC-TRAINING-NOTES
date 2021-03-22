@@ -1,0 +1,133 @@
+Test Classes:
+-------------
+	In SFDC, the code must have 75% code coverage in order to be deployed to Production.
+	This code coverage is performed by the test classes.
+	Test classes are the code snippets which test the functionality of other Apex class.
+	
+	Data Creation:
+	-------------
+	We need to create data for test class in our test class itself.
+	Test class by default does not have access to organization data but if you set @isTest(seeAllDataa = true),
+	then it will have the access to organization's data as well.
+	
+	@isTest annotation:
+	-------------------
+	By using this annotation, you declared that this is a test class.
+	It will not be counter against the organization's total code limit.
+
+	Test.startTest() & Test.stopTest():
+	----------------------------------
+	These are the standard test methods which are available for test classes.
+	These methods contain the event or action for which we will be simulating our test.
+	
+	System.assert():
+	----------------
+	This method checks the desired output with the actual.
+	In this case, we are expecting the event an Invoice record to be inserted so we added assert to check the same.
+
+======================================================================
+Navigation:
+1. Create a class from Developer console. (Code Coverage : None)
+2. Create another class with an @isTest Annotation and a method testMe() ->
+   which calls the first call to be checked.
+3. From second class, click on Run Test.
+4. Go to first class, and you will see the Code Coverage will be 100%.
+=======================================================================
+public class Apex_Testex{
+	public string name;
+	public string branch;
+	public void show(){
+		name = 'CTS';
+		branch = 'PUNE';
+	}
+}
+---------------------------------------
+@isTest
+private class Test_Example_1{
+	@isTest
+	static void testMe(){
+		Apex_Testex ae = new Apex_Testex();
+		ae.show();
+		System.assertEquals('CTS',ae.name);
+		System.assertEquals('PUNE',ae.branch);
+	}
+}
+=====================================================
+trigger Account_Trigger_1 on Account (before insert){
+	//Trigger.New: This will contain list of new records which we want to insert
+	for(Account a: Trigger.New){
+		a.Rating = 'Warm';
+		a.Ownership = 'Private';
+		a.Type = 'Prospect';
+	}
+}
+-----------------------------
+@isTest
+public class accTriggerTest {
+	public static testmethod void acctrigger(){
+		List<Account> accList = new List<Account>();
+		for(Integer i=0; i<100; i++){
+			Account acc1 = new Account(Name='TestAccountName'+i,Ownership='Private');
+			accList.add(acc1);
+		}
+		insert accList;
+		System.assertEquals('Private',accList[12].Ownership);
+		}
+	}
+
+Link for Trigger Test:
+https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_methods_system_system.htm
+
+SOSL : Salesforce Object Search Language:
+-----------------------------------------
+1. This is used to search for a particular keyword in the database.
+2. This will return List<List<Sobject>>
+3. SOSL:
+	
+	FIND 'searchkey' IN FIELDGROUP Returning sobject(fields), sobject2(fields)
+	
+4. Field Group will	
+	ALL FIELDS
+	NAME FIELDS
+	EMAIL FIELDS
+	PHONE FIELDS
+
+===========================================================
+public class SOSL_Example {
+	public List<Account> accounts { set; get; }
+	public List<Contact> contacts { set; get; }
+	public SOSL_Example(){
+		List<List<SObject>> result = 
+		
+		[FIND 'PUNE' IN ALL FIELDS Returning Account(Name,Phone limit 1), Contact(LastName, FirstName where lastname='cts')];
+		
+		accounts = (List<Account>)result[0];
+		contacts = (List<Contact>)result[1];
+	}
+}
+-------------------------------------------
+<apex:page controller="SOSL_Example">
+	<apex:form>
+		<apex:pageBlock title="SOSL_Example">		
+			<apex:pageBlockTable value="{!accounts}" var="a">
+				<apex:column value="{!a.name}" />
+				<apex:column value="{!a.phone}" />
+			</apex:pageBlockTable>
+		</apex:pageBlock>
+		<apex:pageBlock title"SOSL_Example">
+			<apex:pageBlockTable value="{!contacts}" var="a">
+				<apex:column value="{!a.lastname}" />
+				<apex:column value="{!a.firstname}" />
+			</apex:pageBlockTable>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+---------------------------------------------------------------
+
+global class ProcessBuilder_Example{
+	@InvocableMethod
+	global static void callMe(List<Id> accIds){
+		List<Contact> contacts = [ select id from Contact where AccountId in: accIds];
+		delete contacts;
+	}
+}

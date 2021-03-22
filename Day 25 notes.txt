@@ -1,0 +1,166 @@
+REST:
+-----
+	GET:
+	---
+		Used to query/retrieve records. We don't have any request body in this case.
+		We send the information required to retrieve data in the URL parameters.
+	
+		/services/data/v50.0/query/?q=SELECT+Name,Type+FROM+Account
+		
+	POST:
+	-----
+		Used to create new records.In this case, we send data to the server request body.
+		This is the more secure as compared to GET, as we don't expose any data in the URL parameters.
+		We send our data in the request body instead.
+		We usually perform the insert in the data on this case.
+	
+	PUT:
+	----
+		Used to update the existing records or create new records.
+		It is usually specified to perform the upsert operation in which if a record id is specified in the data we're sending.
+		It'll update that record with the new data specified in the request body.
+		Otherwise, it'll create a new record.
+	
+	PATCH:
+	------
+		Used to update fields in the existing records.
+		In this case, we usually perform the update operation on the data given.
+		So, the data must have a record id for the operation to be successful.
+	
+	DELETE:
+	-------
+		Used to delete a record using the record id.
+		We mainly require only the unique record id in this case which will be used to delete the record.
+		No other information is required.
+==============================================================
+@RestResource annotation:
+----------------------------
+Which is of the format :- @RestResource(urlMapping='your-custom-url').
+We can create 5 methods each with a different annotations for the 5 request types:
+	GET, POST, PATCH, DELETE AND PUT.
+
+--------------------------------
+//Setting up the request URL
+@RestResource(urlMapping='/ContactAPI/*')
+global with sharing class ContactResource {
+	//Get Method
+	@HTTPGet
+	global static List<Contact> getContactIdAndNames(){
+	// initializng the request parameter with the incoming request
+	RestRequest contactRequest = RestContext.request;
+	//Getting the request URI
+	String contactRequestURI = contactRequest.requestURI;
+	//Getting the limit from the request URI
+	Integer contactLimit = Integer.valueOf(contactRequestURI.substring(contactRequestURI.lastIndexOf('/')+1));
+	//Querying contacts
+	List<Contact> contactList = [ SELECT Id, Name FROM Contact LIMIT : contactLimit];
+	//returning the contacts in the sequenece
+	return contactList;
+	}
+}
+/services/apexrest/ContactAPI/2
+-----------------------------------------------------
+//Setting up the request URL
+@RestResource(urlMapping='/ContactAPI1/*')
+global with sharing class ContactResouce1{
+	//get methods
+	@HTTPGet
+	global static List<Contact> getContactIdNameAndLeadSource(){
+	//Intializing the request parameter with the incoming request
+	RestRequest contactRequest = RestContext.request();
+	//Getting the URL parameters from the request
+	Map<String, String> contactRequestParams = contactRequest.params;
+	//getting the imit and leadsource from the request URL params
+	Integer contactLimit = Integer.valueOf(ContactRequestParams.get('limit'));
+	String leadSource = contactRequestParams.get('leadsource');
+	//Querying contacts
+	List<Contact> contactList = [SELECT Id, Name, LeadSource FROM Contact WHERE LeadSource=:leadsource LIMIT :contactLimit];
+	//returning the contacts in the response 
+	return contactList;
+}	}
+
+/services/apexrest/ContactAPI1?limit=2&leadsource=web
+
+https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_methods_system_restrequest.htm
+
+----------------------------------------------------------------
+@RestResource(urlMapping='/ContactAPI/*')
+global with sharing class ContactResource {
+	//Post Method
+	@HTTPPost
+	global static Contact createNewContact(String firstName, String lastName, String birthDate, String leadSource){
+		//Intializing new contact
+		Contact contact = new Contact();
+		contact.FirstName = firstName;
+		contact.LastName = lastName;
+		contact.Birthdate = Date.parse(birthDate);
+		contact.LeadSource = leadSource;
+		
+		//inserting contact
+		insert contact;
+		//returning the contact in the response
+		return contact;
+	}
+}
+
+/services/apexrest/ContactAPI
+
+Request Body
+{
+	"firstName": "Richard",
+	"lastName": "Hendricks",
+	"birthDate": "08/03/1989",
+	"leadSource": "Web"
+}
+
+===========================================================================
+//Setting up the request url
+@RestRequest(urlMapping='/ContactAPI/*')
+global with sharing class ContactResource {
+	//DELETE Method
+	@HTTPDelete
+	global static Map<String, String> deleteContact(){
+		//Initializing the response map
+		Map<String, String> responseMap = new Map<String, String>();
+		//Initializing the request parameter with the incoming 
+		RestRequest contactRequest = RestContext.request();
+		String contactRequestURI = contactRequest.requestURI;
+		Id contactId = Id.valueOf(contactRequestURI.substring(contactRequestURI.lastIndexOf('/')+1));
+		Contact contact = new Contact(Id=contactId);
+		try{
+			delete contact;
+			responseMap.put('success','1');
+			responseMap.put('message','Record Deleted Successfully');
+		} catch(DmlException ex){
+			responseMap.put('success','0');
+			responseMap.put('message',ex.getMessage());
+		}
+		return responseMap;
+		}
+	}
+
+===========================================
+
+@RestResource(urlMapping='/ContactAPI/*')
+global with sharing class ContactResource {	
+	@HTTPPut
+	global static Contact upsertContact(String firstName, String lastName, String birthDate, String leadSource){
+		RestRequest contactRequest = RestContext.request;
+		String contactRequestURI = contactRequest.requestURI;
+		String contactId = contactRequestURI.substring(contactRequestURI.lastIndexOf('/')+1);
+		Contact contact = new Contact();
+		if(String.isNotEmpty(contactId)){
+			contact.Id = contactId;
+		}
+		contact.FirstName = firstName;
+		contact.LastName = lastName;
+		contact.Birthdate = Date.parse(birthDate);
+		contact.LeadSource = leadSource;
+		
+		upsert contact;
+		
+		return contact;
+	}
+	}
+	
+https://focusonforce.com/integration-and-data-loading/rest-api-using-weather-example/

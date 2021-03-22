@@ -1,0 +1,333 @@
+
+APEX PL:
+----------
+	Test Links to Practice:
+	
+	https://www.salesforceben.com/certified-admin-mock-exam/
+	https://focusonforce.com/salesforce-adm-201-exam-questions/#quiz
+	
+DAY 11:
+
+FOR LOOP:
+----------
+1. If you want any set of statements to be executed no. of times we use for loop.
+2. for(){
+		}
+3. Syntax:
+	
+	for(param1, param2, param3){ }
+	
+ param1: This will specidy inital value of the count
+		Example: Integer i=0;
+				 Integer i = 101;
+ param2: This will specify condition, when to stop the operations
+		Example: i<30
+				 i<=505
+ param3: This will specify the increment value
+		Example: i++
+
+ Example: Write a for loop to the run the operation 10 times.
+ 
+	for(Integer i=1; i<=10; i++){ }
+	
+ Example: Write a for loop which run for 40 times, starting count is 5
+	
+	for(Integer i=5; i<45; i++) { }
+
+ Example: o/p ->  1 2 3 4 5
+ 
+	for(Integer i=1; i<=5; i++)
+	{
+		System.debug(i); // to print to the console
+	}
+ 
+ Visualforce:
+ ------------
+ 1. Visualforce is a framework.
+ 2. Using Visualforce allows developers to build sophisticated, custom user interfaces that can be hosted natively on the Lightning platform.
+ 3. Visualforce framework includes tag based markups.
+ 4. Visualforce pages consists of:
+	a. Visualforce Markup
+	b. Visualforce Controller
+ 5. Visualforce Markup:
+	a. It is a tag-based programming.
+	b. It consists of Visualforce components and Scripting elements.
+	c. Visualforce components
+		1. These are pre-defined components which are provided by salesfroce to build.
+		2. Syntax:
+			<apex: componentName attribute=value attribute = value />
+				<apex: page>, <apex: pageBlock>, <apex: pageBlockSection> <apex: pageBlockSectionItem> .....
+	d. Scripting Controllers:
+		1. Any scripting language that is supported by browser is also supported by visualforce.
+		Example:
+			HTML, JavaScript, AJAX, JQuery, Node.js, Backbone.js, Angular.js,.....
+6. Visualforce Controller:
+	a. Controllers are the set of instructions, that will be executed when user interacts with components on the pages.
+	b. Action can be manipulation of data or fetch of data or complexed logic.
+	c. There are 3 types of controllers:
+		1. StandardController
+		2. Custom Controller
+		3. Extentions
+	d. StandardController:
+		If you want to refer standard functionalities or properties defined on the objects we will use standardController.
+	e. Custom Controller:
+		If we want to define custom logics or functionalities then we use custom controller.
+	f. Extentions:
+		Is we want to use standard functionalities along with some custom functionalities then we will use extentions.
+ 7. Where we can use visualforce?
+	a. To override standard Buttons.
+	b. To override standard links.
+	c. To create custom buttons and links on standard pages.
+	d. To create sidebar components.
+	e. To create custom user interfaces.
+8. How many ways we can create VF pages:
+	a. Standard Navigation:
+		Setup
+		----> Build
+			----> Develop
+				----> Visualforce Page
+					----> New
+	
+	Step 1: Enter PageName
+	Step 2: Create the body
+	Step 3: Save
+	Step 4: Click on preview
+	
+	b. Using URL
+		1. Enable Development Mode
+		Setup
+		----> Administer
+			----> Manage Users
+				----> Users
+					----> Select User
+						----> Click on Edit
+							----> Enable Development
+								----> Save
+		2. https://serverinstance.salesforce.com/apex/pageName
+			Example: https://ap5.salesforce.com/apex/MyPage
+			Note: When we will give url, it will check whether page exists, if the page doesn't exist it will 
+				  show link to create a page.
+	
+	c. Developer Console:
+		User Name
+		----> Developer Console
+			----> File
+				----> New
+					----> Visualforce Page
+						----> Enter Page Name
+							----> Create Body
+								----> Save It (Ctrl+s)
+
+9. All the VF pages will have.vfp extensions.
+10. Every element in the VF page should have strict xml format.
+	a. Every opening elements should have a closing element
+		<name> </name>
+		<LastName> Reddy </LastName>
+	b. Inner elements should be closed first then outer elements sould be closed
+	    <Name>
+			<LastName> Reddy </LastName>
+			<FirstName> SAI </FirstName>
+		</Name>
+	c. Case-sensitive:
+		<Name> SAI </Name> ----> error Opening element should have corresponsing closing element.
+
+<apex:page>
+	apex:page:
+	-----------
+	1. Page is the name of the component.
+	2. Every VF page will start and end with apex:page
+	3. Attributes:
+		a. id:
+			1. It is a string.
+			2. This string is used to refer to the component in the page.
+		b. apiVersion:
+			1. This will specify version of api we are using.
+			2. Bydefault it will take latest version.
+			3. Current version of api is 50.0
+		c. showHeader:
+			1. It is a boolean value.
+			2. When it is set as true,standard salesfroce sidebar is displayed.
+			3. When it is set as false, standard salesforce sidebar is hidden.
+			4. Deafult value is true.
+		d. sidebar:
+			1. It is a boolean value.
+			2. When set as true, standard salesforce sidebar is displayed.
+			3. When set as false, standard salesforce sidebar is hidden.
+			4. Default value is true.
+		e. renderAs:
+			1. If you want to render the page in the form of pdf then we give renderAs pdf.
+		f. readOnly:
+			1. If you want to open the content of the page in the read mode then we gave readonly as true.
+			2. When readOnly is true, we can display 10,000 records.
+		g. standardcontroller:
+			1. This will refer to subject in the VF page.
+			2. We can only define one subject as StandardController.
+			3. SObject: salesforce object (this can be standard object or custom object)
+				Example: Account, Contact, Customer__c, Loan__c
+		h. Controller:
+			1. This will refer to apex class in the VF page.
+			2. We can only define one apex class as Controller.
+		i. Extensions:
+			1. This will refer to apex class
+			2. If you want to take standardController and controller together then we use extensions.
+	
+	<apex:page>
+	</apex:page>
+
+<apex:pageBlock>
+	apex:pageBlock:
+	---------------
+	1. This will create a block on the page.
+</apex:pageBlock>
+
+<apex:pageBlock title="Employee">
+	title:
+	1. This is a string.
+	2. This will be printed on the left corner of the pageBlock header.
+</apex:pageBlock>
+
+<apex:pageBlock title="Employee" helpTitle="needHelp?" helpUrl="/apex/page">
+	helpTitle:
+	1. This is a string value, printed on the right corner of the header.
+	
+	helpUrl:
+	1. When we click on the helpTitle, page whose url is mentioned as helpUrl will be opened.
+</apex:pageBlock>
+
+<apex: pageBlock title="Employee" tabStyle="Opportunity">
+	tabStyle:
+	THis will specify which object should be applied on the pageBlock.
+</apex:pageBlock>
+
+<apex:pageBlock title="Employee" rendered="false">
+	rendered:
+	1. It is a boolean value.
+	2. When set as false, content of the block is hidden.
+	3. When set as true, content of the block is displayed.
+</apex:pageBlock>
+
+-------------------------------------------------------------
+apex:sectionHeader:
+-------------------
+	1. This component will create header for the page.
+	2. Header logo is auto-generated by the system.
+	3. Attributes:
+	
+		a. title:
+			1. It is a string value.
+			2. This will be displayed as title for the header.
+	
+		b. subTitle:
+			1. It is a string value.
+			2. This wikll be displayed as sustitle for the header.
+		
+		c. help:
+			1. It will take url of the page.
+			2. When we click on help his will open that page.
+		
+		d. rendered:
+			1. It is a boolean value.
+			2. When we set it as true, component will be displayed.
+			3. When we set it as false, component will be hidden.
+		
+		e. description:
+			1. This is a string value.
+			2. This will be displayed below the header.
+			
+		<apex:sectionHeader title="Employee" subtitle="New Employee" help="/apex/Apex_page" rendered="true" description="This is a test"/>
+		
+ <apex:page>
+	<apex:sectionHeader title="Student" subtitle="New Student" help="/apex/testpage" description="Student Information" />
+		<br/>
+		Name : Kiran <br/><br/>
+		College : Kiran <br/><br/>
+		City : HYD <br/><br/>
+	</apex:page>
+	
+apex:pageBlockButtons:
+1. This is a child component of pageBlock.
+2. Whatever we define in the pageBlockButtons, that will be displayed on the header and footer of the block.
+3. Attributes:
+	location:
+	a. This will specify location of the content.
+	b. Possible values are top and bottom.
+	dir:
+	1. This will specify location fo the content.
+	2. Possible values are LTR or RTL.
+	
+<apex:page>
+	<apex:form>
+		<apex:pageBlock title="Example1">
+			<apex:pageBlockButtons>
+				<apex:commandButton value = "Submit" />
+				<apex:commandButton value = "Cancel" />
+			</apex:pageBlockButtons>
+			This is line one <br/>
+			This is line one <br/>
+			This is line one <br/>
+			This is line one <br/>
+		</apex:pageBlock>
+		
+		<apex:pageBlock title="Example2">
+			<apex:pageBlockButtons location="bottom">
+				<apex:commandButton value = "Submit" />
+				<apex:commandButton value = "Cancel" />
+			</apex:pageBlockButtons>
+			This is line one <br/>
+			This is line one <br/>
+			This is line one <br/>
+			This is line one <br/>
+		</apex:pageBlock>
+		
+		<apex:pageBlock title="Example3">
+			<apex:pageBlockButtons location="top" dir="RTL">
+				<apex:commandButton value = "Submit" />
+				<apex:commandButton value = "Cancel" />
+			</apex:pageBlockButtons>
+			This is line one <br/>
+			This is line one <br/>
+			This is line one <br/>
+			This is line one <br/>
+		</apex:pageBlock>
+	
+	</apex:form>
+</apex:page>
+			
+apex:commandButton:
+	1. This is a child component of apex:form.
+	2. This is used to create button of the page.
+	3. Attributes:
+		a. value:
+			1. This is a string value.
+			2. This will be displayed as a label on the button.
+		b. disabled:
+			1. This is a boolean value.
+			2. When set as true, button will be disabled.
+			3. Default value is false.
+		c. rendered:
+			1. It is a boolean value.
+			2. When set as true, button will be displayed.
+			3. When set as false, button will be hidden.
+		d. action:
+			1. This will specify what action should be performed when we click on the button.
+			2. action can be url of a page or method from apex class.
+		e. dir:
+			1. This will specify direction.
+		f. style:
+			1. If you want to apply any case then we use style.
+		
+		<apex:page>
+			<apex:form id="one">
+				<apex:commandButton value="MyButton" />
+				<apex:commandButton value="Cancel" disabled="true" />
+				<apex:commandButton value="Display" rendered="false" />
+				<apex:commandButton value="Submit" action="/apex/Page" />
+				<apex:commandButton value="ReLoad" reRender="one" />
+				<apex:commandButton value="MyStyle" style="background:yellow; color:red;"/>
+				<br/><br/>
+				<apex:pageBlock title="Example">
+					<apex:commandButton value="Submit" />
+					<apex:commandButton value="Cancel" />
+				</apex:pageBlock>
+			</apex:form>
+		</apex:page>

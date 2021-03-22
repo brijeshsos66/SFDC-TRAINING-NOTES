@@ -1,0 +1,434 @@
+Reading the data from the Apex Class:
+1. Every method of the apex which we want to invoke in the lightning should obey the following rules.
+	a. Method should be annotated with @AuraEnabled
+	b. Method should be static method
+	c. Method should have returnType to pass the data.
+2. If you want the apex class in the lightning component/application it should be define as a controller.
+3. When we want to invoke the reffer to the server-side controller method from the client side controller method.
+	Syntax:
+		component.get("c.methodName");
+4. When we want to the setCallback of the controller.
+	
+	var mycall = component.get("c.methodName");
+	mycall.setCallback(this, function(response){
+		logic
+	});
+5. When the method gives the response check the status
+	var state = response.getStatus();
+6. Every apex method invocation from the controller javascript is asynchronous so we need to enqueue the job:
+
+ https://developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/ref_jsapi_action_setCallback.htm
+ 
+============================================================================
+
+Example:
+1. Create a apex class with aura enabled methods
+	Apex class : AuraExample1
+	
+	public class AuraExample1 {
+		@AuraEnabled
+		public static string getName(){
+			return 'Sam';
+			}
+		}
+
+2. Create a custom component which involves the apex class
+	<aura:component controller="AuraExample1">
+		<aura:attribute name="empName" type="string" />
+		<ui:button label="Get EmpData" press="{!c.show}"/>
+		<h1>Employee Name: {!v.empName} </h1>
+	</aura:component>
+
+3. Create a client side controller
+	({
+		show:function(component){
+			var action=component.get("c.getName");
+				action.setCallback(this, function(response){
+					var state = response.getState();
+						if(state === "SUCCESS"){
+							component.set("v.empName", response.getReturnValue());
+							}
+						});
+						$A.enqueueAction(action);
+					}
+		})
+4. Create a application
+<aura:application>
+	<c: apexcall />
+</aura:application>
+
+=========================================================================
+Example: Reading a list account records from Sobject and Display in Lightning
+
+Apex class : AuraExample2:
+	
+	public class AuraExample2{
+		@AuraEnabled
+		public static Account[] getAccounts(){
+			List<Account> accs = [ select id, name from Account limit 4];
+			return accs;
+		}
+	}
+---------------------------------------------------------------------------
+Component : AuraAccList
+
+<aura:component controller="AuraExample2">
+	<aura:attribute name="Accounts" type="Account[]" />
+	<ui:button label="Get Accounts" press="{!c.getAccs}"/>
+	
+	<aura:iteration var="a" items="{!v.Accounts}">
+		<p> {!a.Name} : {!a.Id} </p>
+	</aura:iteration>
+</aura:component>
+
+----------------------------------------------------------------
+Controller:
+	
+	({
+		getAccs: function(cmp){
+			var action = cmp.get("c.getAccounts");
+			action.setCallback(this, function(response){
+				var state = response.getState();
+				if(state === "SUCCESS"){
+					cmp.set("v.Accounts", response.getReturnValue());
+				}
+			});
+		$A.enqueueAction(action);
+		}
+	})
+-------------------------------------------------------------
+Application:
+	<aura:application>
+		<c:AuraAccList></c:AuraAccList>
+	</aura:application>
+
+=================================================================================
+public class Apex_Example_Search{
+	@AuraEnabled
+	public static String getAccountName(String domain){
+		String result;
+		try{
+			Account a = [ Select Name From Account Where Industry = :domain LIMIT 1];
+			result = a.Name;
+		} catch(Exception e){
+			result = e.getMessage();
+		}
+		return result;
+	}
+}
+-------------------------------------------------------------
+Component: Apex_Example_Search_L_C
+
+<aura:component controller="Apex_Example_Search">
+	<aura:attribute name="indusVal" type="String" />
+	<aura:attribute name="result" type="String"/>
+	
+	<lightning:card iconName="utility:account">
+		<aura:set attribute="title">
+			<p>Account</p>
+			<b>Search Account</b>
+		</aura:set>
+		<aura:set attribute="actions">
+			<lightning:buttonGroup>
+				<lightning:button label="get Account" variant="brand" onclick="{!c.searchAcc}"/>
+				<lightning:button label="Cancel"/>
+			</lightning:buttonGroup>
+		</aura:set>
+		<br/>
+		<lightning:input label="Enter Industry" value="{!v.indusVal}"/>
+	</lightning:card>
+	<lightning:card title="result" iconName="standard:account">
+		<lightning:input value="{!v.result}" readonly="true"/>
+	</lightning:card>
+</aura:component>
+-------------------------------------------------------------------------
+({
+	searchAcc : function(comp, event, helper){
+		var myIndus = comp.get("v.indusVal");
+		var action = comp.get("c.getAccountName");
+		action.setParams({
+			domain:myIndus
+		});
+		
+		action.setCallback(this, fucntion(response){
+			var state = response.getState();
+			if(state == 'SUCCESS'){
+				console.log(response.getReturnValue());
+				comp.set("v.result", response.getReturnValue());
+			} else {
+				console.log('failed ' + response.getReturnValue());
+			}
+		});
+		$A.enqueueAction(action);
+	}
+})
+-------------------------------------------
+<aura:application>
+	<c:Apex_Example_Search_L_C/>
+</aura:application>
+==========================================================================
+EVENT
+I) COMPONENT EVENT
+II) Application EVENT
+
+I) COMPONENT EVENT:
+	When an event is fired by component and that event can be handled by component in the hierarchy.
+	Bubble : It propagates the event from source to the application (bottom to top)
+	Capture : It propagates the event from top to bottom (source component)
+	
+II) APPLICATION EVENT:
+	Used to communicate between components and application
+	
+Steps to implement the event
+1. Create a custom event name : Employee_Event.evt
+
+	<aura:event type="COMPONENT" description="Event template" >
+		<aura:attribute name="empName" type="String"/>
+	</aura:event>
+
+2. Registered the event
+	The component which is going to fire the event has to register the event using <aura:register/>
+	
+	<aura:component>
+		<aura:registerEvent name="empEvent" type="c:Employee_Event"/>
+	</aura:component>
+
+3. Fire the event from js controller
+
+	var eventVal = component.getEvent("empEvent");
+	eventVal.fire();
+	
+	Pass Parameter
+		eventVal.setParams({empName:"RAM"});
+
+4. Handling the event (from Parent component)
+	
+	<aura:handler name="empEvent" event="c:Employee_Event" action="{!c.handleChildEvent}"/>
+	
+	get the parameter
+	handleChildEvent : function(component, event, helper){
+		var name = event.getParam("empName");
+	}
+----------------------------------------------------------------------------------
+
+Example:
+File Name : Employee_Event
+
+<aura:event type="COMPONENT" description="Event template" >
+	<aura:attribute name="empName" type="String" />
+</aura:event>
+
+Component: Event_Child.cmp
+
+<aura:component>
+	<aura:registerEvent name="empEvent" type="c:Employee_Event"/>
+	<lightning:card title="Child component">
+		<h1>This is child component</h1>
+		<h1>This is child component</h1>
+		<h1>This is child component</h1>
+		<lightning:button label="clickMe" onclick="{!c.submit}"/>
+	</lightning:card>
+</aura:component>
+
+Controller.js
+({
+	submit: function(component, event, helper){
+		var eventVal = component.getEvent("empEvent");
+		eventVal.setParams({empName: "SWATHI"});
+		eventVal.fire();
+	}
+})
+
+-------------------------------------------
+Event_Parent:
+	
+<aura:component>
+	<aura:handler name="empEvent" event="c:Employee_Event" action="{!c.handleChildEvent}"/>
+	<aura:attribute name="EmployeeName" type="String"/>
+	<lightning:card title="Parent Component">
+		<div class="background:blue">
+			This is Parent component <br/>
+			This is Parent component <br/>
+		</div>
+		{!v.EmployeeName}
+	</lightning:card>
+	<c:Event_Child/>
+</aura:component>
+
+({ 
+	handleChildEvent : function(component, event, helper){
+		var name = event.getParam("empName");
+		component.set("v.EmployeeName", name);
+		}
+})
+-------------------------------------
+<aura:component>
+	<aura:handler name="empEvent" event="c:Employee_Event" action="{!c.handleChildEvent}" />
+	<c:Event_Child/>
+	<aura:attribute name="EmployeeName" type="String"/>
+	<lightning:card title="Parent Component">
+		<div class="background:blue">
+		This is Parent component<br/>
+		This is Parent component<br/>
+	</div>
+	{!v.EmployeeName}
+	</lightning:card>
+</aura:component>
+
+({
+	handleChildEvent: function(component, event, helper){
+	console.log("from parent");
+	alert("fired from new_Account");
+	component.set("v.EmployeeName",name);
+	}
+})
+
+<aura:application extends="force:slds">
+	<c:Event_Parent/>
+</aura:application>
+--------------------------------------------------------------------------
+ii) Application Type
+Application events communicate across components. It is a kind of publish and subscribe model.
+
+Example:
+FileName: AppType_Event.evt
+<aura:event type="APPLICATION" description="Event template" />
+
+Component 1: Child_One_Comp.cmp
+	<aura:component>
+		<aura:registerEvent name="first" type="c:AppType_Event"/>
+		<lightning:button label="fire the event" onclick="{!c.submit}"/>
+		<h1>I am child one</h1>
+		<h1>I am child one</h1>
+		</aura:component>
+	
+	Controller.js
+	({
+		submit:function(component, event, helper){
+			var newEvent = $A.get("e.c:AppType_Event");
+			newEvent.fire();
+		}
+	})
+
+Component 2: Child_Two_Comp.cmp
+<aura:component>
+	<aura:attribute name="message" type="String"/>
+	<aura:handler event="c:AppType_Event" action="{!c.show}"/>
+	<h1>I am child two</h1>
+	<h1>I am child two</h1>
+	{!v.message}
+</aura:component>
+
+({	
+	show: fucntion(component, event, helper){
+		component.set("v.message","child two has handled the event");
+		}
+	})
+
+Component 3: Child_Three_Comp.cmp
+<aura:component>
+	<aura:attribute name="message" type="String" />
+	<aura:handler event="c:AppType_Event" action="{!c.callMe}"/>
+	<h1>I am child three</h1>
+	<h1>I am child three</h1>
+	{!v.message}
+</aura:component>
+
+controller.js
+({
+	callMe: function(component, event, helper){
+		component.set("v.message","child three handled the event");
+	}
+})
+
+Component 4: parent_Comp.cmp
+
+<aura:component>
+	<c:Child_One_Comp/>
+	<c:Child_Two_Comp/>
+	<c:Child_Three_Comp/>
+</aura:component>
+
+=================================================================================
+Differences between COMPONENT AND APPLICATION Type in implementation
+---------------------------------------------------------------------------------
+1. No difference in Registering the event
+	Component Type
+	<aura:registerEvent name="accEvent" type="c:Account_Event"/>
+	
+	Application Type
+	<aura:registerEvent name="first" type="c:AppType_Event"/>
+
+2. There is a difference in handling and firing the event
+	Component Type (name is required)
+	<aura:handler name="accEvent" event="c:Account_Event" action="{!c.setAccountId}"/>
+	
+	Firing based on name attribute of aura:handler :
+	var eventRef = component.getEvent("accEvent");
+	eventRef.fire();
+	
+	Application Type(name is NOT required)
+	<aura:handler event="c:AppType_Event" action="{!c.show}"/>
+	
+	Firing the Event based on file name using global variable $A
+	var newEvent = $A.get("e.c:AppType_Event");
+	newEvent.fire();
+	
+	ASSESSMENT
+	----------
+Global inc trying to migrate their siebel system to salesforce in phase 1 they want to migrate there sales process.
+ThEY HAVE  account team and opportunity team which needs to be integraeted with external
+System(oracle db)  if there is any change or addition to the teams
+
+Account record will have the following  stages
+Unqualified
+Qualified
+Authorized
+Inactive
+Active
+
+Ensure that no duplicate record will be created on Accounts
+
+The opportunity record will have the following stages
+Pre-Discovery
+Discovery
+Assesment
+Decision
+Revenue
+Lost
+Dropped
+Void
+
+When opportunity stage will move from Pre-Discovery to Discovery  a similar record opportunity will be 
+created as opportunity Program Team Member will be under it as 1:n relation
+
+
+Opportunity stage cant move from Pre-Discovery to Assesment without passing Through
+"Discovery stage"
+
+Once the Account move from Unqualified to Qualified then the related opportuities will be moved to Assesment stage
+
+ 
+ There should be a page for mass Update/edit of Account Team and Opportunity Team
+ Custom object device will be created under opportuity Program Team with fields like
+ 
+ Automotve device
+ Account(lookup)
+ Opportunity(lookup)
+ Opportunity program(lookup)
+ Back side grind
+ Stage(Design in(Default) Tapeout,Prototype,RTR,Production,EOL)
+ Status(Active,Inactive,Void ,on-Hold)
+ Geometry(0.028UM,0.022UM,0.13UM,0.180UM)
+ Process Family(CSO18SW,45RFSOI,28HSW,22TRF)
+ Device sourcing
+ Tapeout Type(Single product , Multi Product, Customer MPW,GlobalShuttle MPW)
+ Tapeout process(FMS 2.0 ,PTRF)
+ 
+ ALL FIELDS ARE MANDATORY
+ 
+ A approval on device object is required to move the status to Tapeout a user cannot update the status field normally
+ 
+ There will be another object named form management under the device object which will have 20 fieldsto 
+ to capture some data and also associate multiple contact form there should be a custom ui to capture the form
+ details and add multiple contacts in one operation.

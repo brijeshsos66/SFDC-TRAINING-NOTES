@@ -1,0 +1,466 @@
+Aggregate Functions:
+--------------------
+1. count() : This will return the count of no. of records returned by the soql.
+			 It will return Integer value.
+			 
+	Example:
+		Integer size = [ select count() from Account where industry='Energy'];
+	
+2. count(FieldName): This will return the count of no. of records which has the given field value entered.
+					 This will return AggregateResult.
+	
+	Example:
+		AggregateResult result = [ select count(Name),count(Industry) from Account];
+
+3. Sum(fieldName): This will return summarized value of given field from the result set.
+	
+	Example:
+		AggregateResult result = [ select  sum(Amount) from Opportunity];
+
+4. AVG(FieldName): This will return average value of given field from the resultSet.
+5. MIN(FieldName): This will return minimum value of given field from the resultSet.
+6. MAX(FieldName): This will return maximum value of given field from the resultSet.
+
+Note: If you write a soql query with aggregate functions then we get List of Aggregate funtions.
+
+List<AggregateResult> myResult = [ select stageName, sum(amount) total,Min(amount) minval,
+									max(amount) maxval, avg(amount) avgval from opportunity
+									group by stageName ];
+	
+	for(AggregateResult result : myResult){
+		String stage = (String) result.get('stagename');
+		Decimal total = (Decimal)result.get('total');
+		Decimal minval = (Decimal)result.get('minval');
+		Decimal maxval = (Decimal)result.get('maxval');
+		Decimal avgval = (Decimal)result.get('avgval');
+		system.debug('StageName::::'+stage);
+		system.debug('Total::::'+total);
+		system.debug('Minimum Value::::'+minval);
+		system.debug('Maximum Value::::'+maxval);
+		system.debug('Average Value::::'+avgval);
+	}
+	
+DML(Data Manipilation Language):
+--------------------------------
+1. These are used to perform the changes on the data.
+2. We have following types of DML operations
+	a. Insert
+	b. Update
+	c. Delete
+	d. Undelete
+	e. Merge
+	f. Upsert
+3. If you are performing dml on list of records then it is called bulk dml operation.
+4. There are 2 types of DML:
+	a. Atomic
+	b. Non-Atomic
+5. Atomic Operation:
+	a. Perform all operations or none.
+	b. When we are performing dml on list of records, if dml on any one of the record fail, entire operation will fail.
+	c. Any dml operation using the keywords insert, update, delete, undelete, merge, upsert is a atomic operation.
+	
+6. Non-Atomic:
+	a. When we are performing dml on group of recirds, if dml on any record fails, only that record will fail,
+	   rest of the oepration will be success.
+	b. If you want to perform dml as non-atomic we need to perform the dml using Database methods.
+	c. Example:
+		Database.insert(sobject,flag);
+		Datebase.update(sobject,flag);
+	
+7. insert:
+----------
+a. This is used to create a new record in the sobject.
+b. Syntax:
+	insert sobject/sobject[]
+c. Example:
+	1. Create a new Account.
+		
+		Account acc = new Account();
+		acc.Name='Testing';
+		acc.Phone='1234';
+		acc.Industry='Banking';
+		insert acc;
+
+Note: When we insert a new record, all the validation rules, and workflow, process builder, triggers will run.
+	
+	2. Create a contact record.
+		
+		Contact con = new Contact();
+		con.LastName = '';
+		con.FirstName='RAM';
+		con.Phone='12345';
+		insert con;
+	
+	3. Create a customer record (FirstName__c, LastName__c, Phone__c, Email__c)
+		
+		Customer__c cust = new Customer__c();
+		cust.FirstName__c='Ram';
+		cust.LastName__c='';
+		cust.Phone__c='11111';
+		cust.Email__c='abc@xyz.com';
+		insert cust;
+	
+	4. Create a new Account with wilson as owner.
+		
+		User u = [ select id from User where lastname='WILSON' limit 1];
+		Account acc = new Account();
+		acc.Name='Testing';
+		acc.Phone='1234';
+		acc.Industry='Banking';
+		acc.ownerId=u.id;
+		insert acc;
+	
+	5. Create a new Opportunity for the account whose name is CTS.
+		
+		Account acc = [ select id, name from Account where name='CTS'];
+		Opportunity op = new Opportunity();
+		op.Name = 'Admin';
+		op.closeDate=System.now()+15;
+		op.Stage='Prospecting';
+		op.Amount=10000;
+		op.AccountId = acc.Id;
+		insert op;
+	
+	6. Create a wilson as AccountTeamMember of Genpoint Account.
+		
+		AccountTeamMember:  When we want a group users to collaborate and work on a account, then we create them as a AccountTeamMembers.
+		
+		Fields of AccountTeamMember
+		AccountId : Id of the account for which AccountTeamMember should be created.
+		TeamMemberRole : Role of the TeamMember.
+		UserId : Id of the user, whom you wan to create as teamMember.
+		AccountAccessLevel : Type of access which you want to give to user on Account.
+		
+		User u = [ select id from Account where name='Genpoint'];
+		AccountTeamMember atm = new AccountTeamMember();
+		atm.AccountId = acc.Id;
+		atm.UserId = u.Id;
+		atm.TeamMemberRole = 'Account Manager';
+		atm.AccountAccessLevel='Edit';
+		insert atm;
+	
+	7. Create a task for an Account
+		Task Fields:
+			a. OwnerId: Id of the user/Role to whom you want to assign the task.
+			b. Subject: It can be anything.
+			c. WhatId: Id of the record on which task is created.
+			d. WhoId: It is optional, it is the Id of the Lead or Contact who is associated with task.
+			e. ActivityDate: Due date for task.
+			f. Priority
+			g. Status
+	
+		Account acc = [ select id from Account where name='Genpoint'];
+		Task t = new Task();
+		t.subject='Schedule a call';
+		t.Priority='Normal';
+		t.status = 'Not started';
+		t.ActivityDate = System.today()+15;
+		t.whatId = acc.Id;
+		insert t;
+	
+	8. Creating record with list
+	
+		List<Account> accList = new List<Account>();
+			Account acc = new Account();
+			acc.Name='Testing';
+			acc.Phone = '1234';
+			acc.Industry='Banking';
+		accList.add(acc);
+			Account acc1 = new Account();
+			acc1.Name='Testing 123';
+			acc1.Phone = '1234';
+			acc.1Industry='Banking';
+		acc.add(acc1);
+		insert accList;
+	
+	9. Database.Error:
+		a. Error is a pre-defined apex class.
+		b. This is defined under the namespace of database.
+		c. This class contains the errors that are generated during the DML operations.
+		1. getFields():
+			a. This method will return name of the fields on which error occured.
+			b. Syntax: <!-- List<String> getFields() -->
+		
+		2. getMessage():
+			a. This method will return the error message that is generated during the dml.
+			b. Syntax: <!-- String getMessage() -->
+		
+	10. Database.SaveResult:
+		a. SaveResult is a pre-defined apex class.
+		b. This class contains status of the dml (insert, update) operation that is performed on the object.
+		c. Methods:
+			1. isSuccess():
+				This will return the status of the DML operation.
+				If the dml is success it will return true.
+				Failed return false.
+				Syntax: Boolean isSuccess()
+			
+			2. getId():
+				This will return the Id of the record on which dml is performed.
+				Syntax: Id getId()
+			
+			3. getErrors():
+				This will return the errors that are generated during the DML operation.
+				Syntax: Database.Error[] getErrors()
+		
+		LINKS: https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_methods_system_database.htm
+		
+		11. Database.insert(sObject[], flag):
+			a. Insert is the method defined in the Database class.
+			b. If the flag is true, then DML operation will run like atomic.
+			c. If the flag is false, then DML operation will run like non-atomic.
+			d. Syntax : Database.SaveResult[] RES = Database.insert(sObject[], flag)
+			
+			List<Account> accounts = new List<Account>();
+			Account a1 = new Account(Name='TCS', Phone='1234');
+			Account a2 = new Account(Phone='12345');
+			account.add(a1);
+			account.add(a2);
+			
+			Datebase.SaveResult[] result = Database.insert(accounts,false);
+			for(Datebase.SaveResult s : result){
+				if(s.isSuccess()){
+					System.debug('Record Inserted successfully Id: '+s.getId());
+				} else {
+					for(Datebase.Error er : s.getErrors()){
+						System.debug('Fields:'+er.getFields());
+						System.debug('Message:'+er.getMessage());
+					}
+				}
+			}
+	
+	12. DmlOptions.AssignmentRuleHeader
+		-------------------------------
+		1. AssignmentRuleHeader is a pre-defined apex class.
+		2. This class is defined under DMLoptions.
+		3. This class contains two variables.
+			a. assignmentRuleID : This will specify the id of the assignmentRule.
+			b. useDefaultRule : This is a boolean value, when set as true, default assignment rule is applied.
+			
+			Example:
+			AssignmentRule rule = [select id from AssignmentRule where name='CustomAssign'];
+			Datebase.DmlOptions op = new Database.DmlOptions();
+			op.AssignmentRuleHeader.assignmentRuleID = rule.id;
+			
+	13. Database.insert(Sobject[],dmloptions):
+		--------------------------------------
+		a. While creating a lead/case if you want to apply any assignement rule then we use dml options.
+		
+		Example:
+			AssignmentRule rule = [ select id from AssignmentRule where name='CustomAssign'];
+			Database.DMLOptions op = new Database.DMLOptions();
+			op.AssignmentRuleHeader.assignmentRuleID = rule.id;
+			Lead l = new Lead();
+			l.LastName = 'K';
+			l.FirstName='Sravan';
+			l.company='Testing';
+			l.industry='Banking';
+			l.Phone='12345';
+			Database.insert(l,op);
+	
+	14. Update:
+		a. If you want to perform any chnages in the data which is already save to the object, then we use dml operation of update.
+		b. If you want to perform update
+			1. Fetch hte data from the database by using soql.
+			2. Modify the data and update to database.
+			3. Syntax: update object/Sobject[]
+						Datebase.SaveResult[] RES = Database.update(Sobject[], flag)
+			
+		Example 1:
+		1. Fetch all the accounts whose rating is Warm and update their rating as Hot
+		
+		List<Account> accounts = [ select id, rating from Account where rating='Warm' ];
+		for(Account a : accounts){
+			a.Rating = 'Hot';
+		}
+		update accounts;
+		
+		2. Fetch all the opportunities whose stagename is prospecting and update their stagename as closed won and closedate as today.
+		
+		List<Opportunity> optyList = [ select Id, stagename, closeDate from Opportunity where stageName='Prospecting'];
+		for(Opportunity op : optyList){
+			op.stageName = 'Closed Won';
+			op.closeDate = System.today();
+		}
+		update optyList;
+	
+	15. Delete:
+		a. This will delete the data from the databases.
+		b. Fetch the data from database and delete.
+		c. Syntax: delete Sobject/Sobject[]
+			     : Database.DeleteResult[] Datebase.delete(Sobject[], false)
+		d. Datebase.DeleteResult:
+			1. DeleteResult is a pre-defined apex class.
+			2. This will contain the status of the dml operation delete.
+			3. Methods:
+				a. isSuccess()
+				b. getId()
+				c. getErrors()
+		
+		Example:
+			a. Delete all the leads which are created in the last months.
+				List<Lead> leads = [ select id, FirstName from Lead where createdDate=Last_Month];
+				if(leads.size > 0){
+					delete leads;
+				}
+			b. Fetch all the accounts with correspoding contacts.
+				If the account doesn't contain any contact then delete account.
+				
+				List<Account> accounts = [ select id, Name,(select id, lastname, firstname from Contacts) from Account);
+				List<Account> accs= new List<Account>();
+				for(Account a : accounts){
+					if(a.contacts.size() == 0){
+						accs.add(a);
+						}
+					}
+				Database.DeleteResult[] result = Database.delete(accs,false);
+			
+	16. Upsert:
+		a. If the record already exists them update the record, if the record doesn't exists then create  the record.
+		b. We perform upsert based on Id of the record or externalId field.
+		c. ExternalId field can be Email, Number, Text Field.
+		d. Syntax:
+			upsert sobject[] externalId
+		
+		e. If you don't mention any externalUd, by default it will take salesforce recordId.
+		Example:
+		1. Create a custom object : Customer
+		2. Create a custom fields
+			FieldName			Standard			Datatype			ExternalId
+			-------------------------------------------------------------------------
+			Name 				Yes					Text					-
+			Salary				No					Currency				-
+			MyId				No					Number					-
+		
+		3. Create a New Record:
+			Customer__c c1 = new Customer__c();
+			c.Name='Dell';
+			c.Salary__c=45000;
+			c.MyId=1;
+			insert c;
+		
+		4. Execute the following code
+			Customer__c cust1 = new Customer__c();
+			cust1.Name = 'Testing';
+			cust1.MyId__c=1;
+			cust1.Salary__c=50000;
+			Customer__c cust2 = new Customer__c();
+			cust2.Name = 'Wipro';
+			cust2.MyId__c=2;
+			cust2.Salary__c=45000;
+			
+			List<Customer__c> customers = new List<Customer__c>();
+			customers.add(cust1);
+			customers.add(cust2);
+			
+			upsert customers MyId__c;
+		
+	17. Datebase.UpsertResult:
+		----------------------
+		1. UpsertResult is a pre-defined apex class.
+		2. This class contains the status of the dml operation performed.
+		3. Methods:
+			a. isSuccess() : This will return true, if the upsert is success.
+			b. getId()     : This method will return Id of the record in which upsert is performed.
+			c. getErrors() : This method will return the errors that are generated during the dml operation.
+			d. isCreated() : This method will return true, if the upsert is a create.
+		
+		Example:
+		Customer__c cust1 = new Customer__c();
+			cust1.Name = 'Testing';
+			cust1.MyId__c=1;
+			cust1.Salary__c=50000;
+		Customer__c cust2 = new Customer__c();
+			cust2.Name = 'Wipro';
+			cust2.MyId__c=2;
+			cust2.Salary__c=45000;
+		List<Customer__c> customers = new List<Customer__c>();
+		customers.add(cust1);
+		customer.add(cust2);
+		Database.UpsertResult[] result = Database.upsert(customers, false);
+		for(Database.UpsertResult r : result){
+			if(r.isSuccess()){
+				System.debug('Record Id:'+r.getId());
+			} else {
+				Database.Error[] errors = r.getErrors();
+				for(Database.Error er : errors){
+					System.debug(er.getMessage());
+					System.debug(er.getFields());
+					}
+				}
+			}
+		
+	18. Merge:
+		a. This will join two or more records into single record.
+		b. Syntax: merge parent1 parent2
+		c. Child records parent2 are re-assigned to parent 1 and parent 2 is deleted from the object.
+		d. Merge is combination of update and delete.
+		
+		Example:
+		
+			Account a1 = new Account();
+			a1.Name='Wipro';
+			a1.Phone='1234';
+			insert a1;
+			Contact c1 = new Contact();
+			c1.LastName = 'Ch';
+			c1.FirstName= 'Satish';
+			c1.accountId = a1.Id;
+			insert c1;
+			
+			Account a2 = new Account();
+			a1.Name='Dell';
+			a1.Phone='9876';
+			insert a2;
+			Contact c2 = new Contact();
+			c2.LastName = 'K';
+			c2.FirstName= 'Kiran';
+			c2.accountId = a2.Id;
+			insert c2;
+			merge a1 a2;
+	
+	19. Undelete:
+		a. This will undelete the data from the recycle-bin.
+		2. First fetch the Id's of the records which are deleted.
+			[select fields from Sobject where isDeleted=True ALL ROWS];
+		3. Syntax:
+			undelete sobject[]
+			
+			List<Account> accounts = [select id, name from Account where isDeleted=true ALL ROWS];
+			undelete accounts;
+			Database.UndeleteResult[] result = Database.undelete(accounts, false);
+	
+	20. Database.emptyRecycleBin():
+		This method will hard-delete the data.
+		List<Account> accounts = [ select Name from Account where isDeleted= true ALL ROWS	];
+			Database.emptyRecycleBin(accounts);
+			
+	21. SavePoint and Rollback:
+		1. These are trasactional control statements.
+		2. This will commit all the chnaes to the database or commit none of the changes.
+		3. Savepoint:
+			a. This will creae a instance of the current data at that instance.
+			b. Savepoint sp = Database.setSavePoint();
+		4. Rollback: if you want to rollback to old instance of savepoint then we use 
+				Database.rollback(savepoint);
+			
+		Example:
+		
+		Savepoint sp = Database.setSavePoint();
+		try{
+			Account acc = new Account();
+			acc.Name = 'Wipro';
+			acc.Phone='040-12234';
+			insert acc;
+			Contact con = new Contact();
+			con.LastName='M';
+			con.FirstName='Satish';
+			con.AccountId = acc.Id;
+			insert con;
+		}
+		catch(Exception e){
+			Database.rollback(sp);
+		}
+	
+	
+			

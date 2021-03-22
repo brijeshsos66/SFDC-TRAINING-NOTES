@@ -1,0 +1,269 @@
+public class DML_Example_1 {
+	public Account acc { set; get; }
+	public DML_Example_1(){
+		acc = new Account();
+	}
+	public PageReference create(){
+		Integer count = [ select count() from Account where name=:acc.Name];
+		try{
+			if(count > 0){
+				ApexPages.Message msg = new ApexPages.Message(ApexPages.Severity.Error,'Duplicate record exists');
+				ApexPages.addMessage(msg);
+				return null;
+			} else {
+				insert acc;
+				PageReference p = new PageReference('/'+acc.Id);
+				return p;
+			}
+			}
+		catch(Exception e){
+			ApexPages.Message msg = new ApexPages.Message(ApexPages.Severity.Error,e.getMessage());
+			ApexPages.addMessage(msg);
+			return null;
+			}
+		}
+	}
+---------------------------------------------------------------
+<apex:page controller="DML_Example_1">
+	<apex:form id="one">
+		<apex:pageMessages />
+		<apex:pageBlock title="Account">
+			<apex:pageBlockButtons location="top">
+				<apex:commandButton value="Submit" action="{!create}" id="one" />
+			</apex:pageBlockButtons>
+			<apex:pageBlockSection columns="1">
+				<apex:inputText value="{!acc.Name}" />
+				<apex:inputText value="{!acc.Phone}" />
+				<apex:inputText value="{!acc.Industry}" />
+				<apex:inputText value="{!acc.rating}" />
+				<apex:inputText value="{!acc.Ownership}" />
+				<apex:inputText value="{!acc.type}" />
+			</apex:pageBlockSection>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+===============================================================================
+public class DML_Example_2{
+	public Account acc { set; get; }
+	public Contact con { set; get; }
+	public DML_Example_2(){
+		acc = new Account();
+		con = new Contact();
+	}
+	public PageReference create(){
+		//Check for the duplicate account
+		Integer count = [ select count() from Account where name=:acc.Name];
+		if(count > 0){
+		//If duplicate account is fount throw error message
+		ApexPages.Message msg = new ApexPages.Message(ApexPages.Severity.Error,'Duplicate Record Found');
+		ApexPages.addMessage(msg);
+		return null;
+		} else { 
+		//if duplicate record not found, insert contact and account
+		try{
+			insert acc;
+			con.accountId = acc.Id;
+			insert con;
+			//If account and contact are successful then go to detail page of account
+			PageReference p = new PageReference('/'+acc.Id);
+			return p;
+			}
+		catch(Exception e){
+		ApexPages.Message msg = new ApexPages.Message(ApexPages.Severity.Error,e.getMessage());
+		ApexPages.addMessage(msg);
+		return null;
+		}
+		}
+		}
+		public void cancel(){
+			acc = new Account();
+			con = new Contact();
+		}
+	}		
+============================================================
+<apex:page controller="DML_Example_2">
+	<apex:form>
+		<apex:pageMessages />
+		<apex:pageBlock title="Account_Contact">
+			<apex:pageBlockButtons location="top">
+				<apex:commandButton value="Submit" action="{!create}" />
+				<apex:commandButton value="Cancel" action="{!cancel}" />
+			</apex:pageBlockButtons>
+			<apex:pageBlockSection title="Account">
+				<apex:inputText value="{!acc.Name}" />
+				<apex:inputText value="{!acc.Phone}" />
+				<apex:inputText value="{!acc.Industry}" />
+				<apex:inputText value="{!acc.rating}" />
+			</apex:pageBlockSection>
+			<apex:pageBlockSection title="Contact">
+				<apex:inputText value="{!con.LastName}" />
+				<apex:inputText value="{!con.Phone}" />
+				<apex:inputText value="{!con.FirstName}" />
+				<apex:inputText value="{!con.Email}" />
+			</apex:pageBlockSection>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+===============================================================
+public class Mass_Delete_Example { 
+	public List<Account> accounts { set; get; }
+	public Mass_Delete_Example(ApexPages.StandardSetController controller){
+		List<String> fields = new List<String>{'Id','Name','Industry','Rating'};
+		controller.addFields(fields);
+		accounts = (List<Account>)controller.getSelected();
+	}
+	public PageReference deleteDate(){
+		delete accounts;
+		PageReference p = new PageReference('/001');
+		return p;
+	}
+}
+--------------------------------------------
+<apex:page standardController="Account" extension="Mass_Delete_Example" recordSetVar="items">
+	<apex:form>
+		<apex:pageBlock title="Account">
+			<apex:pageBlockButtons location="top">
+				<apex:commandButton value="Delete" action="{!deleteDate}" />
+			</apex:pageBlockButtons>
+			<apex:pageBlockTable value="{!accounts}" var="a">
+				<apex:column value="{!a.name}" />
+				<apex:column value="{!a.industry}" />
+				<apex:column value="{!a.rating}" />
+			</apex:pageBlockTable>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+============================================================
+public class Mixed_DML_Example {
+	public void create() {
+		invoke();
+		Account acc = new Account();
+		acc.Name = 'Testing';
+		insert acc;
+	}
+	@future
+	public static void invoke(){
+		Profile p = [SELECT Id FROM Profile WHERE Name='Standard User'];
+		UserRole r = [SELECT Id FROM UserRole WHERE Name='COO'];
+		//Create new user with a non-null user role id
+		User u = new User(alias='abc', email='abc@xyz.com', emailencodingkey='UTF-8', lastname='testing123',
+							languagelocalekey='en_US', localesidekey='en_US', prodile=p.Id, userroleid = r.Id,
+							timezonesidkey='America/Los_Angeles',username='aaac@xyz.com');
+		insert u;
+	}
+}
+----------------------------------------------------------------------
+1. Create a contact record with following data
+	LastName		FirstName		Phone			Email
+	M				RAM				040-111			abc@xyz.com
+
+2. Create a list of opportunity and insert the data
+	Name		StageNAME			Amount			CloseDate
+	------------------------------------------------------------
+	Admin		Prospecting			10000			Today()
+	Testing		Closed Won			15000			Today()+15
+
+3. Fetch all the accounts whose rating is hot and update them as warm.
+4. Fetch all the opportunities whose stage name is prospect and update their stagename as closed won and closeDate as today.
+5. Fetch all the leads which are created today and delete them.
+6. Fetch all the accounts whose rating is hot and delete them.
+7. Fetch all the opportunity whose stagename is closedwon and delete them.
+8. Fetch all the accounts records which are in recyclebin.
+9. Fetch all the leads which are deleted and undelete them.
+10. Child records of record 2 are re-assigned to record1 and delete record2.
+11. Create a array of New Accounts and insert
+			Name				Industry
+			Wipro				Energy
+			TCS					Education
+12. Write a query and fetch amount whose name is Wipro and create a new Contact for the wipro.
+13. Create a Lookup and Customer object with account as parent
+		Customer__c
+			LastName__c;
+			FirstName__c
+			Company__c -Lookup(Account)
+	a. Fetch the account whose name is TCS and create a new Customer record for it.
+
+14. Create a new opportunity for the amount whose name is Dell.
+15. Fetch all the opportunities of Account whose name is Wipro and re-assign the opportunities to TCS account.
+
+------------------------------------------------------------
+public class Governing_Limits_Exam {
+	/* SOQL Limit : 100 */
+	public void soql1(){
+		List<Account> acc = [ select id from Account ];
+		List<Account> cons = [ select id from Contact ];
+		for(Integer i=1; i<=50; i++){
+			List<Opportunity> opty = [ select id from opportunity];
+		}
+	}
+	public void soql2(){
+		for(Integer i=1; i<=50; i++){
+			List<Case> cases = [ select id from Case ];
+		}
+		soql1();
+	}
+/* DML Statements : 150 */
+	public void dml1(){
+		Account acc = new Account();
+		acc.Name = 'Testing';
+		insert acc;
+		update acc;
+		delete acc;
+		undelete acc;
+		for(Integer i=1; i<= 100; i++){
+			Account a = new Account();
+			a.Name = 'Wipro';
+			a.Industry = 'Banking';
+			insert a;
+			}
+		}
+		public void dml2(){
+			for(Integer i=1; i<=50; i++){
+				Contact c = new Contact();
+				c.LastName = 'M';
+				c.FirstName = 'Satish';	
+				insert c;
+			}
+		dml1();
+	}
+	public void dml3(){
+	List<Contact> conList = new List<Contact>();
+		for(Integer i=1; i<=50; i++){
+				Contact c = new Contact();
+				c.LastName = 'M';
+				c.FirstName = 'Satish';	
+				conList.add(c);
+			}
+			insert conList;
+		dml1();
+	}
+	/* DML ROWS: 10000, with in a transaction we can perform DML on 10,000 records only */
+	public void dmlrows(){
+		List<Account> accounts = new List<Account>();
+		for(Integer i=1; i<=5005; i++){
+			Account a = new Account();
+			a.Name='Testing';
+			a.Phone='040-1123';
+			accounts.add(a);
+			}
+		insert accounts;
+		for(Account a : accounts){
+			a.industry = 'Energy';
+		}
+		update accounts; //5005
+		}
+	}
+---------------------------------------------
+Governing Limits:
+------------------
+1. Salesforce is implementing Multi-Tenant architecture.
+2. To obey multi-tenant salesforce has imposed some limits on every functionality.
+	a. Maximum 100 soql
+	b. Maximum 150 DML
+	c. soql will return 50,000 records.
+	d. Maximum no of dml rows : 10,000
+	e. webservices : 100
+	f. sosl : 20
+	g. Future : 50
+	h. queueable : 50
+	i. Schedulable : 100

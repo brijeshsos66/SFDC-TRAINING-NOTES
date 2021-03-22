@@ -1,0 +1,445 @@
+PageReference:
+---------------
+1. It is a pre-defined apex class.
+2. This is defined under the namespace of system.
+3. This is used to refer to a instance of a particular page.
+4. Syntax:
+
+	PageReference p = new PageReference(url of the page);
+	
+5. We can also refer to a VF page using PageName:
+	
+	PageReference p = Page.PageName;
+	
+6. This will be used to navigate from one page to another page.
+7. This will be used to refer to particular from custom controller.
+----------------------------------------------------------------------
+
+	public class PageReference_Example {
+		public String name { set; get; }
+		public String city { set; get; }
+		public PageReference_Example(){
+				name = 'Ram';
+				city = 'Pune';
+			}
+		public PageReference call(){
+			PageReference p = new PageReference('/apex/HELLOPAGEREFER');
+			return p;
+			}
+		public PageReference show(){
+			String url = '/apex/HELLOPAGEREFER?name='+name;
+			url = url + '&city=' + city;
+			PageReference p = new PageReference(url);
+			return p;
+			}
+		}
+		
+		<apex:page controller="PageReference_Example">
+			<apex:form>
+				<apex:commandButton value="Page1" action="{!call}" />
+				<apex:commandButton value="Page2" action="{!show}" />
+			</apex:form>
+		</apex:page>
+		
+		VF Page: == HELLOPAGEREFER
+		<apex:page>
+			HELLO INDIA, JAI HOO
+		</apex:page>
+		
+-------------------------------------------------------------------------
+
+Output Field & Output Text:
+---------------------------
+In Output Field, we can edit whereas, in Output Text we can't edit.
+
+<apex:page standardController = "Account">
+	<apex:form>
+		<apex:pageBlock title="Account">
+			<apex:inlineEditSupport>
+			<apex:pageBlockSection title="Outputfield">
+				<apex:outputField value="{!Account.Name}" />
+				<apex:outputField value="{!Account.Phone}" />
+				<apex:outputField value="{!Account.Industry}" />
+				<apex:outputField value="{!Account.Rating}" />
+			</apex:pageBlockSection>
+			<apex:pageBlockSection title="OutputText">
+				<apex:outputText value="{!Account.Name}" />
+				<apex:outputText value="{!Account.Phone}" />
+				<apex:outputText value="{!Account.Industry}" />
+				<apex:outputText value="{!Account.Rating}" />
+			</apex:pageBlockSection>
+			</apex:inlineEditSupport>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>
+
+Picklist using the Select options:
+---------------------------------------
+
+public class Select_Example{
+	public List<SelectOption> options { set; get; }
+	public List<SelectOption> places { set; get; }
+	public Select_Example(){
+		
+		SelectOption op1 = new SelectOption('none','-None-');
+		SelectOption op2 = new SelectOption('Hyd','TG');
+		SelectOption op3 = new SelectOption('Ban','KA');
+		SelectOption op4 = new SelectOption('Che','TN');
+		
+		options = new List<SelectOption>();
+		
+		options.add(op1);
+		options.add(op2);
+		options.add(op3);
+		options.add(op4);
+		
+		List<String> myPlaces = new List<String>{'SRNagar','LBNagar','KPHB'};
+		places = new List<SelectOption>();
+		
+		for(String s: myPlaces){
+			SelectOption op = new SelectOption(s,s);
+			places.add(op);
+		}
+	}
+}
+
+<apex:page controller = "Select_Example">
+	<apex:form>
+		CITIES : <apex:selectList size="1">	
+						<apex:selectOptions value = "{!options}" />
+				</apex:selectList>
+		<br/><br/>
+		PLACES : <apex:selectList size="1">
+						<apex:selectOptions value="{!places}" />
+				 </apex:selectList>
+	</apex:form>
+</apex:page>
+------------------------------------------------------------------------
+
+Standard Controller Extension:
+------------------------------
+
+public class myControllerExtension {
+	
+	private final Account acct;
+	
+	//The extension contructor intializes the private member
+	//variable acct by using the getRecord method from the standard controller.
+	
+	public myControllerExtension(ApexPages.StandardController stdController){
+		this.acct = (Account)stdController.getRecord();
+	}
+	
+	public String getGreeting() {
+		return 'Hello' + acct.name + '(' + acct.id + ')';
+	}
+}
+
+<apex:page standardController="Account" extensions="myControllerExtension">
+	{!greeting} <p/>
+	<apex:form>
+		<apex:inputField value="{!account.name}" /><p/>
+		<apex:commandButton value="Save" action="{!save}" />
+	</apex:form>
+</apex:page>
+
+-----------------------------------------------------------------------------------
+Collections: List, Set & Map.
+
+List:
+-----
+1. 	It is a part of collections.
+2. List is a collection os similiar elements.
+3. Size of the list can grow or reduce based on run-time requirement.
+4. List maintains insertion order.
+5. List will accept duplicate value.
+6. Elements in the list are referred using index.
+7. Index value starts with zero.
+8. In the Apex we have pre-defined apex class "List" to implement the concept of List.
+
+https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_methods_system_list.htm
+
+List<T> : Where "T " is a datatype.
+			List<Integer>
+			List<Decimal>
+			List<Account>
+			List<Contact>
+			List<Customer__c>
+			
+	9. Initialize the list
+	
+		List<Integer> ages = new List<Integer>();
+		List<String> names = new List<String>();
+		List<Account> accs = new List<Account>();
+		List<Customer__c> customers = new List<Customer__c>();
+		
+		Example:
+		1. Create a list of store phones number which are in the form 123,4556
+			List<Integer> phones = new List<Integer>();
+		
+		2. Create a list to store phone numbers which are in the form 040-123, 030-2333
+			List<String> phones = new List<String>();
+		
+		3. Create a list to store Opportunity records.
+			List<Opportunity> optyList = new List<Opportunity>();
+			
+		4. Create a list to store Order records.
+			List<Order> orders = new List<Order>();
+			
+		5. Create a list to store Quote data.
+			List<Quote> quotes = new List<Quote>();
+			
+	10. Methods:
+		a. isEmpty():
+			1. If the list is empty it will return true.
+			2. It will return boolean value.
+			3. Syntax: Boolean isEmpty()
+				
+				List<Integer> ages;
+				Boolean b = ages.isEmpty(); //Error: Nullpointer Exception
+				
+				List<Integer> ages = new List<Integer>();
+				Boolean b = ages.isEmpty();
+				System.debug(b);          // true
+				
+		b. getSobjectType():
+			1. This will return type of sobject used in the list.
+			2. This method is used only if datatype is sobject(Account, Customer__c, ...)
+			Example:
+				
+				Syntax
+				Schema.SobjectType getSobjectType();
+				List<Account> accounts = new List<Account>();
+				System.debug(accounts.getSobjectType());   // Account
+				
+				List<Contact> accounts = new List<Contact>();
+				System.debug(accounts.getSobjectType());   // Contact
+				
+				List<Integer> accounts = new List<Integer>();
+				System.debug(accounts.getSobjectType());   // Error: This method is applied for sobjects only.
+			
+		c. add(ele):
+			1. This method will add now element to the list at the end of the list.
+			2. Syntax:
+				
+				void add(ele)
+				
+				List<Integer> ages = new List<Integer>();
+				ages.add(10);
+				
+				      0
+				--------------
+				|     10     |
+				--------------
+				
+				ages.add(20);
+				      0			  1 
+				-----------------------
+				|     10     |    20  |
+				-----------------------
+				ages.add(30);
+				      0			  1 	   2
+				--------------------------------
+				|     10     |    20  |	   30  |
+				--------------------------------
+				Integer a = 50;
+				ages.add(a);
+				      0			  1 	   2		3
+				-----------------------------------------
+				|     10     |    20  |	   30  |	50	 |
+				-----------------------------------------
+				Integer b = 90;
+				ages.add(b);
+				      0			  1 	   2		3		4
+				--------------------------------------------------
+				|     10     |    20  |	   30  |	50	|	90	 |
+				--------------------------------------------------
+				
+			Examples:
+			
+			1. Create a list to store cityNames and add
+				Hyd, Ban, Che,Pune, Bombay, Nagpur, Noida, NCR
+				
+				List<String> cityNames = new List<String>();
+				cityNames.add('Hyd');
+				cityNames.add('Ban');
+				String a = 'Che';
+				cityNames.add(a);
+				String b = 'Pune';
+				cityNames.add(b);
+				cityNames.add('Bombay');
+				cityNames.add('Nagpur');
+				system.debug('cityNames:::'+cityNames);
+				
+			2. Create a list of add salaries 10,000 20,000 45,000 90,000 23,000
+			
+				List<Decimal> salaries = new List<Decimal>();
+				salaries.add(10000);
+				salaries.add(20000);
+				salaries.add(45000);
+				Decimal amt = 90000;
+				salaries.add(amt);
+				salaries.add(23000);
+				
+			3. Create a list to store Account records
+				Name				Phone
+				Wipro				040-1111
+				TCS					020-2222
+				Dell				030-3333
+				
+				List<Account> accounts = new List<Account>();
+				Account a1 = new Account();
+				a1.Name = 'Wipro';
+				a1.Phone = '040-1111';
+				accounts.add(a1);
+				
+				Account a2 = new Account();
+				a2.Name = 'TCS';
+				a2.Phone = '020-2222';
+				accounts.add(a2);
+				
+				Account a3 = new Account();
+				a3.Name = 'Dell';
+				a3.Phone = '030-3333';
+				accounts.add(a3);
+			
+			4. Create a list to store contact records:
+					LastName		FirstName
+					M               Kiran
+					N				Prasad
+					L				Naveen
+					
+				
+				List<Contact> contacts = new List<Contact>();
+				Contact c1 = new Contact();
+				c1.LastName = 'M';
+				c2.FirstName = 'Kiran';
+				contacts.add(c1);
+		
+		g. get(index):
+			1. This will return the elements which is at given index.
+				List<Integer> ages = new List<Integer>();
+					ages.add(10);
+					ages.add(20);
+					ages.add(30);
+					ages.add(40);
+					
+				      0			  1 	   2		3		
+				-----------------------------------------
+				|     10     |    20  |	   30  |	40	|		 
+				-----------------------------------------	
+					Integer a = ages.get(2);
+					System.debug(a);     // 30
+					
+					Integer b = ages.get(3);
+					System.debug(b);     // 40
+				
+				Example: 2
+				a. Create a list which will store Hyd,Ban,Che,Pune
+				b. Get the element which is at index 1
+				c. Get the element which is at index 2
+				
+				List<String> cities = new List<String>();
+				cities.add('Hyd');
+				cities.add('Ban');
+				cities.add('Che');
+				cities.add('Pune');
+				String s1 = cities.get(1); // Ban
+				String s2 = cities.get(2); // Che
+				
+				Example: 3
+					a. Create a List which will store accounts
+						Name 			Industry
+						Wipro 			Banking
+						TCS				Energy
+						Dell			Education
+					b. Get the element which is at index 0
+					c. Get the element which is at index 1
+						List<Account> accounts = new List<Account>();
+						Account a1 = new Account(Name='Wipro', Industry='Banking');
+						Account a2 = new Account(Name='TCS', Industry='Energy');
+						Account a3 = new Account(Name='Dell', Industry='Education');
+						accounts.add(a1);
+						accounts.add(a2);
+						accounts.add(a3);
+						
+						Account acc = accounts.get(0);
+						Account acc1 = accounts.get(1);
+						System.debug('acc:::'+acc);
+						System.debug('acc1:::'+acc1);
+		
+		i. size():
+			1. This will return count of no. of elements in the list.
+			
+				List<Integer> ages = new List<Integer>{10,20,30,40,50};
+				      0			  1 	   2		3		4
+				--------------------------------------------------
+				|     10     |    20  |	   30  |	40	|	50	 |
+				--------------------------------------------------
+				Integer count = ages.size();
+				System.debug(count);  // 5
+		
+		j. sort():
+			1. This will sort the elements in the ascending order the return the list.
+			      0			  1 	   2		3			4
+				--------------------------------------------------
+				|     90     |    20  |	   80  |	40	|	10	 |
+				--------------------------------------------------
+				List<Integer> ages = new List<Integer>{90,20,80,40,10};
+				ages.sort();
+				System.debug(ages);  //{10,20,40,80,90}
+		
+		Examples:
+			1. We have a list of accounts with name "accounts"
+				Write a logic to fetch all the names of the account put them in a seperate list.
+				
+				List<String> names = new List<String>();
+					for(Account accDetails : accounts){
+							names.add(accDetails.name);
+						}
+			2. We have a list of opportunities with name "optyList"
+				Fetch all those opportunities whose stagename is closed won and put them in newList
+				
+				List<Opportunity> newList = new List<Opportunity>();
+				for(Opportunity op : optyList){
+					if(op.stagename == 'Closed Won'){
+						newList.add(op);
+					}
+				}
+			3. We have a list of Leads with name "myLeads"
+				Take every lead and create new contact based on Lead Data and put the contactsList in the a seperatelist (LastName, FirstName, Phone)
+				
+				List<Contact> contactsList = new List<Contact>();
+				for(Lead l : myLeads){
+					Contact c = new Contact();
+					c.LastName = l.LastName;
+					c.FirstName = l.FirstName;
+					c.Phone = l.Phone;
+					contactsList.add(c);
+				}
+			4. We have a list of accounts with name "accounts"
+			If account rating is hot then create a new opportunity for account where opportunity
+			name is account name stagename is prospecting
+			closedate is 15days from today
+			add the opportunity to a new List.
+			
+			List<Opportunity> optyList = new List<Opportunity>();
+			for(Account a : accounts){
+				if(a.rating == 'Hot'){
+					Opportunity op = new Opportunity();
+					op.Name = a.Name;
+					op.stageName = 'Prospect';
+					op.closeDate = System.today() + 15;
+					optyList.add(op);
+				}
+			}
+
+Set:
+------
+	1. Set is a collection of similiar elements.
+	2. Size of the set can grow or decrease based on run time requirement.
+	3. Set will not accept duplicate elements.
+	4. Set will not maintain insertion order.
+	5. Set will not work for DML operations.
+
+			

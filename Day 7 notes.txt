@@ -1,0 +1,367 @@
+Validation Rules:::::::::::::::
+
+ISNEW(): This will returs true, if the validaton rule is fired due to new record.
+ISCHANGED(FieldName): This will return true, if the navigation field value is modified.
+PRIORVALUE(FieldName): This will return the prior value of the given field which is modified.
+
+
+Object: Oppourtunity
+Rule: When a new oppourtunity is created and closeDate is less than today date throw error.
+
+	AND ( ISNEW(),
+		  CloseDate < TODAY()
+		)
+
+Object : Oppourtunity
+Rule : When oppourtunity amount is modified and new amount is less than old amount then error.
+
+	AND (
+		ISCHANGED(Amount),
+		PRIORVALUE(Amount) > Amount
+		)
+	
+Object : Account
+Rule : When ever rating is Hot and Ownership is public then throw error.
+
+	AND(
+		ISPICKVAL(Rating,'Hot'),
+		ISPICKVAL(Ownership,'Public')
+		)
+	
+Object : Loan
+Field : Security__c (Assert, Salary)
+1. Is Security__c is Salary and salary value is null then throw error.
+
+	AND(
+		ISPICKVAL(Security__c, 'Salary'),
+		ISNULL(Salary__c)
+		)
+
+Object : Loan
+Field : Security__c (Assert, Salary)
+1. Is Security__c is Assert and AssertCost value is NULL then throw error.
+	
+	AND(
+		ISPICKVAL(Security__c, 'Assert'),
+		ISNULL(AssertCost)
+		)
+		
+Task:
+------
+	1. It is standard object.
+	2. It is a part of Activites.
+	3. Any work assigned on the record will be stored as Task.
+	4. When we want to create a task we should know:
+		a. To whom we are assigning.
+		b. What is the due date.
+		c. On which record we are assigning.
+		d. What is the status of the task.
+	5. Task can be assigned on any object which has allow activites options enabled.
+	6. Allow Activites option is by default enabled on every standard object,
+				On Custom object it is optional.
+	7. Task can be assigned to User, Owner, Role.
+		a. If a task is assigned to a user, he will be the owner of the task.
+		b. If a task is assigned to owner.
+			1. Is owner is a user, then task is assigned to user.
+			2. If owner is a queue, User who intiated the operation will be the owner of the task.
+		c. Is task is assigned to role, if only one user has this role, if only one user has this role, then this user will be the 
+		owner of the task.
+		d. If the task is assigned to role, if there are more than one user with same role, Owner of the record will become 
+		owner of the task.
+	8. Tasks which are assigned to the user are visable on the home page as MyTasks.
+	9. On the detail page of the record we find the tasks assigned under open activites.
+	
+	Exmaple 1:
+	Task:
+	Object				: Lean
+	AssignedTo			: User : Wilson
+	Name				: Schedule Appointment
+	Due Date			: 10 Days from Trigger Date
+	Status				: Not Started
+	Priority			: Normal
+	
+	
+	Setup
+	----> Build
+		----> Create
+			----> Workflows and Approvals
+				----> Tasks	
+					----> New Task
+	
+	Workflow : 1
+	Object 		: Lead
+	Rule Name 	: Corporate Leads
+	Evaluation	: Created
+	Rule		: Rating Hot and Lead Source is Web
+	Actions		: Immediate Actions
+	
+	Task		: Assign Existing Action : Schedule Appointment
+	Setup:
+	----> Build
+		----> Create
+			----> Workflow and Approvals
+				----> Workflow Rules
+					----> Continue
+						----> New Workflow Rule
+							----> Select the object with whom you want to create the workflow
+								----> Next
+									----> Give the Workflow Name
+										----> Evalution Criteria
+											----> Give some Rule Criteria
+												----> Save
+	Now, we have to create the workflow rule, criteria to do some action.
+													----> And remember to activate it
+
+Field Update:
+-------------
+
+	1. When a condition is met, if you want to system to update the value of a field, then we use field update action.
+	2. Using the field update action we can modify the fields of the record and its master record fields.
+	3. Steps to create field update action:
+		Setup:
+		----> Built
+			----> Create
+				---->Workflows and Approvals
+					----> Field Update
+		
+		Step 1: Enter Action Name
+		Step 2: Choose the object
+		Step 3: Choose the field
+		Step 4: Set the value
+		Step 5: Save
+	4. Example 1:
+		a. Field Update Action:
+			Action Name 			: Rating Update
+			Object 					: Lead
+			Field					: Rating
+			Choose PickList			: Hot
+			save.
+		b. Create a workflow :
+			Rule Name				: Lead Rating Update
+			Object					: Lead
+			Evaluation				: Created 
+			Rule					: Lead Source=Web
+			Action					: Immediate, Choose from Existing Action 
+									  Rating Update
+			Click on Done
+			Click on Activate
+		c. Create a Test Record on the Lead with LeadSource at web check the raitng value.
+	
+	5. When we have workflow rule with multiple field update actions, then field update actions will be executed in the 
+		order of field update action created date.
+	Example 2:
+			a. Field Update Action 1:
+				CreatedDate			:	10-Aug-2018	:10:20 AM
+				Object				:	Account
+				Rule Name			:	First Action
+				Field				:	Description
+				Value				:	This updated with first action
+				
+			b. Field Update Action 2:
+				CreatedDate			:	10-Aug-2018	:10:30 AM
+				Object				:	Account
+				Rule Name			:	First Action
+				Field				:	Description
+				Value				:	This updated with second action
+			
+			c. Create Workflow Rule:
+				Rule Name			:	Multiple Actions
+				Object				:	Amount
+				Evaluation			:	Created
+				Rule				:	Industry=Banking
+				Action				:	Immediate Actions add the existing actions in the order of
+										Action 2
+										Action 1
+			
+			d. Testing
+				1. Click on Account tab and create new Account with following data
+					Name		:	Wipro
+					Industry	:	Banking
+					Rating		:	Hot
+					
+				save the record
+		
+		o/p: Wipro---Banking---Hot---This update with Action
+	
+	6. When we have multiple workflow rules on the same object, then actions will be performed.
+	7. When we have multiple workflow rules defined on the same object, all the rules are verified first then actions
+	   are performed next as per workflow created date.
+	   
+	   Example 3:
+		a. Workflow			:	1
+			CreatedDate		: 	10-Aug-2018:10:30 AM
+			Name			:	First
+			Object			:	Account
+			Rule			:	Industry=Banking
+			Action			:	Immediate Choose from Existing Action 2.
+			
+		b. Workflow			:	2
+			CreatedDate		: 	15-Aug-2018:10:30 AM
+			Name			:	Second
+			Object			:	Account
+			Rule			:	Rating=Hot
+			Action			:	Immediate Choose from Existing Action 1.
+			
+		c. Workflow			:	3
+			CreatedDate		: 	17-Aug-2018:10:30 AM
+			Name			:	Third
+			Object			:	Account
+			Rule			:	Rating=Ward
+			Action			:	Immediate Choose Field Update Rating=Cold.
+		
+		4. Test it :
+		Click on Account Tab, Create a new Account with following data
+		
+			Name		:	Wipro
+			Industry	:	Banking
+			Rating		:	Hot
+			
+			Execution:
+			
+				Wipro---Banking---Hot
+				Step 1: Check all the rules : WR1: true, WR2: true, WR3: false
+				
+				Step 2: Collect the actions of those rules which are true
+						WR1 : Action
+						WR2 : Action
+				
+				Step 3: Run the actions as per the order of Workflow created date
+				
+					First set WR1 Action: Wipro---Banking--Hot---This is Second Update
+					Second WR2 Action	: Wipro---Banking--Hot---This is first Update
+				O/P: Wipro---Banking---Hot---This is second Update.
+	
+	8. Re-evaluate the workflow rule after field Changes:
+		a. If this option is enabled, if there are any field update due to the workflow rule,
+			it will re-check the remaining rules which are failed in the earlier steps.
+			
+			Example 4:
+			1. Field Update		:	Action 1
+			   Object			:	Account
+			   Field			:	Ownership = Private
+			   Re-evaluate		:	False
+			  
+			2. Field Update		:	Action 1
+			   Object			:	Account
+			   Field			:	Ownership = Private
+			   Re-evaluate		:	False
+			   
+			3. Workflow			: 1
+			   CreatedDate		: 10-Aug-2018:10:30 AM
+			   Name				: First
+			   Object			: Account
+			   Rule				: Industry=Banking
+			   Action			: Immediate Choose from Existing Action 1
+			  
+			   Workflow			: 2
+			   CreatedDate		: 15-Aug-2018:10:30 AM
+			   Name				: Second
+			   Object			: Account
+			   Rule				: Ownership=Private
+			   Action			: Immediate Choose from Existing Action 2
+			   
+			Testing : Create
+				Name	:	Wipro
+				Industry:   Banking
+				Ownership:	Public
+				Rating	:
+				O/P:  Wipro---Banking---Private
+			
+			Note: GoTo Action 1 and enable this Re-Evaluate Workflow
+				Create a Test Record
+				Name	:	Wipro
+				Industry:	Banking
+				Ownership:  Public
+				Rating:
+				O/P: Wipro---Banking---Hot
+			
+Email Template:
+---------------
+	Setup
+	----> Administer
+		----> Communication Templates
+			----> Email Template
+				----> New Email Template
+	
+	Step 1: Choose the template type
+	Step 2: Enter Template Name
+	Step 3: Enable Available for Use
+	Step 4: Create the subject
+	Step 5: Create the body of template
+	
+	Example 1:
+	1. Create a Email Template
+		Name					:	Lead Acknowledgement
+		Available for Use		: 	Yes
+		Subject					: 	Lead Confirmation
+		Body					: 
+		<!--
+			Dear (!Lead.FirstName),
+			Thanks for showing interest on our products,
+			My Agent will getback to you in 48 working hours.
+			We have received following details
+			Name	:	(!Lead.FirstName) (!Lead.LastName)
+			Phone	: 	(!Lead.Phone)
+			Email	:	(!Lead.Email)
+			
+			Thanks
+			Sales Team
+		-->
+
+Time-Dependent Workflow Actions:
+---------------------------------
+	1. When the condition and criteria is met action will be automated by the workflow rules.
+	2. If you want action to be performed at a specific time then we go with time based workflow actions.
+	3. Time Based workflow actions are performed when the evaluation criteria is:
+		a. Created
+		b. Created and any time edited to meet the criteria.
+	4. If you want to define Time-based actions, we have to create Time Triggers.
+	5. Time Triggers will specify at what time actions should be performed.
+	6. Time Trigger will be formed using the Date or DateTime fields of the object, with before or after given
+		no. of days or hours.
+	7. We can define 10 time triggers for a workflow.
+	8. In each time trigger we can have 40 different actions.
+	9. Out of 40 actions:
+		Email				: 10
+		Fields Updates		: 10
+		Task				: 10
+		Outbound			: 10
+	10. How to track the Time-Based Workflow actions.
+		Setup
+		----> Monitor
+			----> Time-Based -Workflow -Actions
+				----> Give a condition
+					----> Track the status
+		
+		Example:
+		Workflow Rule:
+			Object			:	Oppourtunity
+			Name			:	New Oppourtunity
+			Evaluation		:	Cretaed and Any time edited to subsequently meet the criteria.
+			Rule			:	CloseDate != today
+			Action			: 	Time Based Action
+			Time Trigger	:	3 days before CloseDate
+							:	Action	: Task
+								Assign To Owner
+		Test:
+		Create a new Oppourtunity
+			Name			:	Admin
+			CloseDate		:	18-JAN
+			Stage			:	Prospect
+			Type			:	New Customer
+		
+		Navigate to
+		Setup
+		----> Monitor
+			----> Time-Based-Workflow-Queue
+				----> Condition
+						Object = Oppourtunity
+						
+		We are supposed to choose one of the user as default workflow user.
+
+
+	
+	
+
+	
+	
